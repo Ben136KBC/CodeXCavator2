@@ -20,4 +20,4 @@ Things I intend to work on:
 - Add to PortableApps
 - Sorting amongst results
 
-Last updated: 15 February 2019 by Ben van der Merwe
+Last updated: 15 February 2019 by Ben van der Merwe.
