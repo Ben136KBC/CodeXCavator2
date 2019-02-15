@@ -1,0 +1,1 @@
+If this directory does not exist when you start a build under Visual Studio, Visual Studio will hang. This text file is there to ensure it exists.
