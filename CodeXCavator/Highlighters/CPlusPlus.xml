@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Highlighters>
+  <!-- C++ / C highlighter -->
+  <Highlighter Type="RegexHighlighter" FileExtensions=".cpp;.hpp;.hxx;.c;.h">
+    <Configuration CaseSensitive="true">
+      <Patterns>
+        <Pattern Token="LINE_COMMENT" RegEx="//.*$" Color="#ff808080"/>
+        <Pattern Token="GOTO_LABEL" RegEx="'\b*[_a-zA-Z][a-zA-Z_0-9\.]*\:" Color="#ff0000ff"/>
+        <Pattern Token="COMMENT_START" RegEx="/\*" Color="#ff808080"/>
+        <Pattern Token="COMMENT_END" RegEx="\*/" Color="#ff808080"/>
+        <Pattern Token="TAG" RegEx="\+\#[_a-zA-Z][a-zA-Z_0-9\.]*\#\+" Color="#ffff8000"/>
+        <Pattern Token="NUMBER_LITERAL" RegEx="0[xX][0-9A-Fa-f]+|[0-9]*\.?[0-9]*[eE]?[\+\-]?[0-9]+(U|u|L|l|UL|Ul|uL|ul|LU|Lu|lU|lu|F|f|D|d|M|m)?" Color="#ff0080ff"/>
+        <Pattern Token="STRING_LITERAL" RegEx="[L]?\&quot;(?:\\.|[^\\\&quot;\r\n])*\&quot;" Color="#ffff00ff"/>
+        <Pattern Token="PREPROCESSOR_KEYWORD" RegEx="\#ifdef|\#ifndef|\#if|\#else|\#elif|\#endif|\#define|\#undef|#include\s+.*$|\#warning|\#error|\#line|\#pragma\s+(warning|vtordisp1|unmanaged|strict_gs_check|setlocale|section|runtime_checks|region,endregion|push_macro|pop_macro|pointers_to_members1|package|pack|optimize|once|omp|managed|make_public|loop1|intrinsic|inline_recursion|inline_depth|init_seg1|include_alias|hdrstop|function|fp_contract|float_control|fenv_access|detect_mismatch|deprecated|data_seg|const_seg|conform1|component|code_seg|check_stack|bss_seg|auto_inline|alloc_text|message|comment)|\#pragma" Color="#ff800080"/>
+        <Pattern Token="OPERATOR" RegEx="\=|\-|\+|\?|\*|\/|\%|\&amp;|\||\^|\!|\~|\=\=|\!\=|\&gt;\=|\&lt;\=|\&amp;\=|\|\=|\+\=|\-\=|\+\+|\-\-|\*\=|\/\=" Color="#ff208000"/>
+        <Pattern Token="SEPARATOR" RegEx="\.|\,|\:|\;" Color="#ff008080"/>
+        <Pattern Token="IDENTIFIER" RegEx="[_\w^0-9][\w]*" Color="#ff000000"/>
+        <Pattern Token="KEYWORD_TYPE" RegEx="wchar_t|void|unsigned|signed|short|long|int|float|double|char|bool|__wchar_t|__w64|__m64|__m128i|__m128d|__m128|__int8|__int64|__int32|__int16" Color="#ffB08010"/>
+        <Pattern Token="KEYWORD" RegEx="while|volatile|virtual|valuestruct|valueclass|uuid1|using|union|typename|typeid|typedef|try|true|throw|thread1|this|template|switch|struct|static_cast|static_assert|static|sizeof|selectany1|sealed|safecast|return|reinterpret_cast|register|refstruct|refclass|public|protected|property1|property|private|operator|nullptr|novtable1|nothrow1|noreturn1|noinline1|new|namespace|naked1|mutable|literal|interior_ptr|interfacestruct|interfaceclass|inline|initonly|in|if|goto|generic|gcnew|friend_as|friend|foreach|for|finally|false|extern|explicit|event|enumstruct|enumclass|enum|else|dynamic_cast|do|dllimport1|dllexport1|deprecated1|delete|delegate|default|decltype|continue|const_cast|const|class|catch|case|break|auto|array|abstract|__classid|__virtual_inheritance|__value2|__uuidof|__unhook3|__unaligned|__try_cast2|__thiscall|__super|__stdcall|__single_inheritance|__sealed2|__raise|__property2|__pin2|__noop|__nogc2|__published|__multiple_inheritance|__leave|__interface|__inline|__if_not_exists|__if_exists|__identifier|__hook3|__gc2|__forceinline|__finally|__fastcall|__except|__event|__delegate2|__declspec|__cdecl|__box2|__based|__assume|__asm|__alignof-Operator|__abstract2" Color="#ff0000ff"/>
+        <Pattern Token="CHAR_LITERAL" RegEx="[L]?'(?:\\'|[^\\'\n\r])*?'" Color="#ffff00ff"/>
+        <Pattern Token="BRACE" RegEx="\{|\}|\(|\)|\[|\]|\&lt;|\&gt;" Color="#ff800000"/>
+      </Patterns>
+    </Configuration>
+  </Highlighter>
+</Highlighters>

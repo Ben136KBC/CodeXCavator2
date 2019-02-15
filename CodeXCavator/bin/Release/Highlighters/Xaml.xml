@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Highlighters>
+  <!-- Xaml highlighter -->
+  <Highlighter Type="RegexHighlighter" FileExtensions=".xaml">
+    <Configuration CaseSensitive="true">
+      <Patterns>
+        <Pattern Token="COMMENT_START" RegEx="&lt;\!\-\-" Color="#ff808080"/>
+        <Pattern Token="COMMENT_END" RegEx="\-\-&gt;" Color="#ff808080"/>
+        <Pattern Token="XML_TAG_START" RegEx="&lt;/|&lt;\?|&lt;" Color="#ff0000ff"/>
+        <Pattern Token="XML_TAG_END" RegEx="/&gt;|\?&gt;|&gt;" Color="#ff0000ff"/>
+        <Pattern Token="XML_ATTRIBUTE" RegEx="[a-zA-Z_0-9_-]+\s*\=" Color="#ffff0000"/>
+        <Pattern Token="XML_ATTRIBUTE_VALUE" RegEx="@\&quot;(?:\&quot;\&quot;|[^\&quot;\r\n])*\&quot;|\&quot;(?:\\.|[^\\\&quot;\r\n])*\&quot;" Color="#ffff00ff"/>
+        <Pattenr Token="XML_NAMESPACE_DECL" RegEx="xmlns:" Color="#ff0080ff"/>
+        <Pattern Token="TAG" RegEx="\+\#[_a-zA-Z][a-zA-Z_0-9\.]*\#\+" Color="#ffff8000"/>
+      </Patterns>
+    </Configuration>
+  </Highlighter>
+</Highlighters>
