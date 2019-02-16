@@ -1,0 +1,16 @@
+CodeXCavator.UI/bin/Debug/*
+CodeXCavator.UI/bin/Release/*
+CodeXCavator.UI/obj/Debug/*
+CodeXCavator.UI/obj/Release/*
+CodeXCavator.Indexer/bin/Debug/*
+CodeXCavator.Indexer/bin/Release/*
+CodeXCavator.Indexer/obj/Debug/*
+CodeXCavator.Indexer/obj/Release/*
+CodeXCavator.Engine/bin/Debug/*
+CodeXCavator.Engine/bin/Release/*
+CodeXCavator.Engine/obj/Debug/*
+CodeXCavator.Engine/obj/Release/*
+CodeXCavator/bin/Debug/*
+CodeXCavator/bin/Release/*
+CodeXCavator/obj/Debug/*
+CodeXCavator/obj/Release/*
