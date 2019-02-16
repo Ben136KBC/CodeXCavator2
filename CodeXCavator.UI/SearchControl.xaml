@@ -1,0 +1,1129 @@
+﻿<!--
+// Copyright 2014 Christoph Brzozowski
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+//This file has been significantly modified by Ben van der Merwe
+-->
+<UserControl x:Class="CodeXCavator.UI.SearchControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="800" 
+             xmlns:local="clr-namespace:CodeXCavator.UI"
+             xmlns:viewmodel="clr-namespace:CodeXCavator.UI.ViewModel"
+             xmlns:my="clr-namespace:System.ComponentModel;assembly=WindowsBase" UseLayoutRounding="True" DataContextChanged="UserControl_DataContextChanged">
+    <UserControl.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.Find" CanExecute="FindCommand_CanExecute" Executed="FindCommand_Executed"/>
+        <CommandBinding Command="viewmodel:FindCommands.FindInNewTab" CanExecute="FindCommands_FindInNewTab_CanExecute" Executed="FindCommands_FindInNewTab_Executed"/>
+    </UserControl.CommandBindings>    
+    <UserControl.Resources>
+        <!-- Search button style -->
+        <Style x:Key="stlSearchButton" TargetType="Button">
+            <Style.Setters>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Image x:Name="imgButton" DockPanel.Dock="Right" Source="/CodeXCavator.UI;component/Images/find.png" Stretch="None" UseLayoutRounding="True" Margin="2,0,0,0" RenderTransformOrigin="0.5,0.5" Opacity="0.7">
+                                <Image.RenderTransform>
+                                    <ScaleTransform x:Name="trfmButton"/>                                       
+                                </Image.RenderTransform>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleX" To="1.0" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleY" To="1.0" Duration="00:00:00" />
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="MouseOver">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleX" To="1.0" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleY" To="1.0" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="imgButton" Storyboard.TargetProperty="Opacity" To="1.0" Duration="00:00:00" />
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <Storyboard>
+                                                <PointAnimation  Storyboard.TargetName="imgButton" Storyboard.TargetProperty="RenderTransformOrigin" To="0.65,0.65" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleX" To="0.85" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleY" To="0.85" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="imgButton" Storyboard.TargetProperty="Opacity" To="1.0" Duration="00:00:00" />
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Disabled">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="imgButton" Storyboard.TargetProperty="Opacity" To="0.5" Duration="00:00:00" />
+                                            </Storyboard>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                            </Image>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style.Setters>
+        </Style>
+
+        <!-- Update Index button style -->
+        <Style x:Key="stlUpdateIndex" TargetType="Button">
+            <Style.Setters>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Image x:Name="imgButton" DockPanel.Dock="Right" Source="/CodeXCavator.UI;component/Images/UpdateIndex.png" Stretch="Fill" UseLayoutRounding="True" Margin="0,0,0,0" RenderTransformOrigin="0.5,0.5" Opacity="1.0" Width="18">
+                                <Image.RenderTransform>
+                                    <ScaleTransform x:Name="trfmButton"/>
+                                </Image.RenderTransform>
+                            </Image>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style.Setters>
+        </Style>
+
+        <!-- Update Index button style -->
+        <Style x:Key="stlOpenCreateIndex" TargetType="Button">
+            <Style.Setters>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Image x:Name="imgButton" DockPanel.Dock="Right" Source="/CodeXCavator.UI;component/Images/page.png" Stretch="Fill" UseLayoutRounding="True" Margin="0,0,0,0" RenderTransformOrigin="0.5,0.5" Opacity="1.0" Width="18">
+                                <Image.RenderTransform>
+                                    <ScaleTransform x:Name="trfmButton"/>
+                                </Image.RenderTransform>
+                            </Image>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style.Setters>
+        </Style>
+
+        <!-- Immediate search check box style -->
+        <Style x:Key="stlImmediateSearchCheckBox" TargetType="CheckBox">
+            <Style.Setters>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="CheckBox">
+                            <Grid x:Name="grdButton">
+                                <Image x:Name="imgButton" DockPanel.Dock="Right" Source="/CodeXCavator.UI;component/Images/lightning.png" Stretch="None" UseLayoutRounding="True" Margin="2,0,0,0" RenderTransformOrigin="0.5,0.5">
+                                    <Image.Effect>
+                                        <DropShadowEffect x:Name="imgButtonOutline" ShadowDepth="0" Color="Lime" Opacity="0" BlurRadius="4" />
+                                    </Image.Effect>
+                                    <Image.RenderTransform>
+                                        <ScaleTransform x:Name="trfmButton"/>
+                                    </Image.RenderTransform>
+                                </Image>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CheckStates">
+                                        <VisualState x:Name="Checked">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="imgButtonOutline" Storyboard.TargetProperty="Opacity" To="1.0" Duration="00:00:00"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Unchecked">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="imgButtonOutline" Storyboard.TargetProperty="Opacity" To="0.0" Duration="00:00:00"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleX" To="1.0" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleY" To="1.0" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="grdButton" Storyboard.TargetProperty="Opacity" To="0.8" Duration="00:00:00" />
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="MouseOver">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleX" To="1.0" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleY" To="1.0" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="grdButton" Storyboard.TargetProperty="Opacity" To="1.0" Duration="00:00:00" />
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <Storyboard>
+                                                <PointAnimation  Storyboard.TargetName="imgButton" Storyboard.TargetProperty="RenderTransformOrigin" To="0.65,0.65" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleX" To="0.85" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleY" To="0.85" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="grdButton" Storyboard.TargetProperty="Opacity" To="1.0" Duration="00:00:00" />
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Disabled">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="grdButton" Storyboard.TargetProperty="Opacity" To="0.5" Duration="00:00:00" />
+                                            </Storyboard>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style.Setters>
+        </Style>
+
+        <!-- Filter check box style -->
+        <Style x:Key="stlFilterCheckBox" TargetType="CheckBox">
+            <Style.Setters>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="CheckBox">
+                            <Grid x:Name="grdButton">
+                                <Image x:Name="imgButton" DockPanel.Dock="Right" Source="/CodeXCavator.UI;component/Images/funnel.png" UseLayoutRounding="True" Stretch="None" Margin="2,0,0,0" RenderTransformOrigin="0.5,0.5">
+                                    <Image.Effect>
+                                        <DropShadowEffect x:Name="imgButtonOutline" ShadowDepth="0" Color="Lime" Opacity="0" BlurRadius="4" />
+                                    </Image.Effect>
+                                    <Image.RenderTransform>
+                                        <ScaleTransform x:Name="trfmButton"/>
+                                    </Image.RenderTransform>
+                                </Image>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CheckStates">
+                                        <VisualState x:Name="Checked">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="imgButtonOutline" Storyboard.TargetProperty="Opacity" To="1.0" Duration="00:00:00"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Unchecked">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="imgButtonOutline" Storyboard.TargetProperty="Opacity" To="0.0" Duration="00:00:00"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleX" To="1.0" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleY" To="1.0" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="grdButton" Storyboard.TargetProperty="Opacity" To="0.8" Duration="00:00:00" />
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="MouseOver">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleX" To="1.0" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleY" To="1.0" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="grdButton" Storyboard.TargetProperty="Opacity" To="1.0" Duration="00:00:00" />
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <Storyboard>
+                                                <PointAnimation  Storyboard.TargetName="imgButton" Storyboard.TargetProperty="RenderTransformOrigin" To="0.65,0.65" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleX" To="0.85" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleY" To="0.85" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="grdButton" Storyboard.TargetProperty="Opacity" To="1.0" Duration="00:00:00" />
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Disabled">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="grdButton" Storyboard.TargetProperty="Opacity" To="0.5" Duration="00:00:00" />
+                                            </Storyboard>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style.Setters>
+        </Style>
+
+        <!-- Validation control template for search terms -->
+        <ControlTemplate x:Key="ctpValidation">
+            <Grid>
+                <Image x:Name="imgError" Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Right" SnapsToDevicePixels="True" UseLayoutRounding="True" Margin="0,0,3,0" ToolTip="{Binding Path=/ErrorContent}" RenderTransformOrigin="0.5,0.5" Source="/CodeXCavator.UI;component/Images/error2.png"/>
+                <Border BorderBrush="Red" BorderThickness="1.5" CornerRadius="2">
+                    <AdornedElementPlaceholder/>
+                </Border>
+            </Grid>
+        </ControlTemplate>
+        
+        <!-- Collection view source for file list -->        
+        <CollectionViewSource Source="{Binding CurrentSearch.Files}" x:Key="cvsFiles">
+            <CollectionViewSource.SortDescriptions>
+                <my:SortDescription Direction="Ascending"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+        <!-- Collection view source for file types -->
+        <CollectionViewSource Source="{Binding CurrentSearch.FileTypes}" x:Key="cvsFileTypes">
+            <CollectionViewSource.SortDescriptions>
+                <my:SortDescription Direction="Ascending"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+        <!-- Collection view source for search results -->
+        <CollectionViewSource Source="{Binding CurrentSearch.CurrentSearchProcessor.SearchResults}" x:Key="cvsSearchResults">
+            <!--<CollectionViewSource.SortDescriptions>
+                <my:SortDescription PropertyName="FilePath" Direction="Ascending"/>
+            </CollectionViewSource.SortDescriptions>-->
+        </CollectionViewSource>
+        
+        <!-- Converters -->
+        <local:OccurrenceToOccurrenceRangeConverter x:Key="cvtOccurrenceToOccurrenceRange"/>
+        <local:OccurrenceMergeConverter x:Key="cvtMergeOccurrences"/>
+        <local:FileNameToImageSourceConverter x:Key="cvtFileNameToImageSource"/>
+        <local:EnumerableToVisibilityConverter x:Key="cvtEnumerableToVisibility"/>
+        <local:StringToVisibilityConverter x:Key="cvtStringToVisibility"/>
+        <BooleanToVisibilityConverter x:Key="cvtBooleanToVisibility"/>
+        <local:ItemTypeToVisibilityConverter x:Key="cvtItemTypeToVisibility"/>
+        
+        <!-- Search query tooltip template -->
+        <ToolTip x:Key="ttpSearchQuery">
+            <TextBlock>
+                                Enter search terms here.<LineBreak/><LineBreak/>
+                                - You can use search for <Bold>phrases </Bold> by enclosing them with quotation marks: <Bold>&quot;</Bold>#PHRASE#<Bold>&quot;</Bold><LineBreak/>
+                                - You can use <Bold>wildcards</Bold>: <Bold>?</Bold>,<Bold>*</Bold><LineBreak/>
+                                - You can use <Bold>fuzzy search</Bold>: #TERM#<Bold>~</Bold>, #TERM#<Bold>~</Bold>#NUMBER#<LineBreak/>
+                                - You can use <Bold>boolean operators</Bold>: <Bold>AND</Bold>, <Bold>OR</Bold>, <Bold>NOT</Bold> and <Bold>-</Bold>, where the minus char means to exclude all documents which contain the term after the minus char.<LineBreak/>
+                                - You can do <Bold>proximity</Bold> searches: <Bold>&quot;</Bold>;#PHRASE#<Bold>&quot;~</Bold>#DISTANCE_IN_TOKENS#<LineBreak/>
+                                - You have to <Bold>escape</Bold> the following characters by using a <Bold>backslash</Bold>: + - &amp;&amp; || ! ( ) { } [ ] ^ &quot; ~ * ? : \<LineBreak/>
+                                - Search is always <Bold>case sensitive</Bold>.<LineBreak/><LineBreak/>
+                                For further information see: <Italic>Lucene search query syntax</Italic>
+            </TextBlock>
+        </ToolTip>
+        
+        <!-- Tag url navigation context menu template -->
+        <ContextMenu x:Key="ctxTagUrlNavigator" ItemsSource="{Binding Links}" MenuItem.Click="ctxTagUrlNavigatorItem_Click">
+            <ContextMenu.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="{Binding Caption}" FontWeight="Bold" Visibility="{Binding Caption, Converter={StaticResource cvtStringToVisibility}}"/>
+                        <TextBlock Text="{Binding Url}" FontStyle="Italic" Foreground="Blue" Visibility="{Binding Url, Converter={StaticResource cvtStringToVisibility}}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ContextMenu.ItemTemplate>
+        </ContextMenu>
+        
+        <!-- File action context menu template -->
+        <ContextMenu x:Key="ctxDocument" ItemsSource="{Binding AvailableFileActions}" MenuItem.Click="ctxDocumentItem_Click" Tag="{Binding FilePath}">
+            <ContextMenu.Resources>
+                <ControlTemplate x:Key="MenuSeparatorTemplate">
+                    <Separator />
+                </ControlTemplate>
+            </ContextMenu.Resources>
+            <ContextMenu.ItemContainerStyle>
+                <Style TargetType="{x:Type MenuItem}">
+                    <Setter Property="Header" Value="{Binding Caption}"/>
+                    <Setter Property="ToolTip" Value="{Binding Description}"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding }" Value="{x:Null}">
+                            <Setter Property="Template" Value="{StaticResource MenuSeparatorTemplate}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContextMenu.ItemContainerStyle>
+        </ContextMenu>
+
+        <!-- File viewer data template -->
+        <DataTemplate x:Key="dtpFileBrowserTab">
+            <DataTemplate.Resources>
+                <local:OccurrenceToOccurrenceViewModelConverter x:Key="cvtOccurrenceToOccurrenceViewModel"/>
+            </DataTemplate.Resources>
+            <Grid>
+                <Grid.CommandBindings>
+                    <CommandBinding Command="ApplicationCommands.Find" CanExecute="InFileFindCommand_CanExecute" Executed="InFileFindCommand_Executed"/>
+                </Grid.CommandBindings>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="80*"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="20*"/>
+                </Grid.ColumnDefinitions>
+                <DockPanel Grid.Column="2" LastChildFill="True" Margin="5">
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,5">
+                        <Button x:Name="btnFirstMatch" Margin="0,0,5,0" ToolTip="First match" Click="btnFirstMatch_Click" Focusable="false">
+                            <Image Stretch="None" UseLayoutRounding="True" SnapsToDevicePixels="True" Source="/CodeXCavator.UI;component/Images/control_start.png" />
+                        </Button>
+                        <Button x:Name="btnPreviousMatch" Margin="0,0,5,0" ToolTip="Previous match" Focusable="false" Click="btnPreviousMatch_Click">
+                            <Image Stretch="None" UseLayoutRounding="True" SnapsToDevicePixels="True" Source="/CodeXCavator.UI;component/Images/control_rewind.png" />
+                        </Button>
+                        <Button x:Name="btnNextMatch" Margin="0,0,5,0" ToolTip="Next match" Focusable="false" Click="btnNextMatch_Click">
+                            <Image Stretch="None" UseLayoutRounding="True" SnapsToDevicePixels="True" Source="/CodeXCavator.UI;component/Images/control_fastforward.png" />
+                        </Button>
+                        <Button x:Name="btnLastMatch" ToolTip="Last match" Focusable="false" Click="btnLastMatch_Click">
+                            <Image Stretch="None" UseLayoutRounding="True" SnapsToDevicePixels="True" Source="/CodeXCavator.UI;component/Images/control_end.png" />
+                        </Button>
+                    </StackPanel>
+                    <ListView x:Name="lvMatches" DockPanel.Dock="Top" SelectedValue="{Binding ElementName=occOccurrences, Path=SelectedOccurrence}" AlternationCount="2" SelectionChanged="MatchListView_SelectionChanged" SelectionMode="Single">
+                        <ListView.ItemsSource>
+                            <MultiBinding Converter="{StaticResource cvtMergeOccurrences}">
+                                <Binding Path="Occurrences"/>
+                                <Binding Path="CurrentSearch.Occurrences" ElementName="ucInFileSearch"/>
+                            </MultiBinding>
+                        </ListView.ItemsSource>
+                        <ListView.ToolTip>
+                            <TextBlock>
+                                            List of all matches in the current document.<LineBreak/>
+                                            <Bold>Click</Bold> to jump to the selected match.
+                            </TextBlock>
+                        </ListView.ToolTip>
+                        <ListView.View>
+                            <GridView>
+                                <GridView.Columns>
+                                    <GridViewColumn Header="Match" DisplayMemberBinding="{Binding Match}"/>
+                                    <GridViewColumn Header="Line" DisplayMemberBinding="{Binding Line}"/>
+                                    <GridViewColumn Header="Column" DisplayMemberBinding="{Binding Column}"/>
+                                </GridView.Columns>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </DockPanel>
+                <GridSplitter Grid.Column="1" ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" HorizontalAlignment="Stretch" BorderBrush="#80000000">
+                    <GridSplitter.Background>
+                        <LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
+                            <GradientStop Color="#00000000" Offset="0" />
+                            <GradientStop Color="#40000000" Offset="0.5"/>
+                            <GradientStop Color="#00000000" Offset="1" />
+                        </LinearGradientBrush>
+                    </GridSplitter.Background>
+                </GridSplitter>
+                <DockPanel Grid.Column="0" LastChildFill="True" Margin="5">
+                    <DockPanel.CommandBindings>
+                        <CommandBinding Command="viewmodel:FindCommands.FindInFile" CanExecute="FindCommands_FindInFile_CanExecute" Executed="FindCommands_FindInFile_Executed"/>                        
+                    </DockPanel.CommandBindings>
+                    <TextBox DockPanel.Dock="Top" Text="{Binding SearchQuery, StringFormat=Search query: {0}, Mode=OneWay}" FontWeight="Bold" Margin="0,0,0,0" IsReadOnly="True" BorderBrush="{x:Null}" Focusable="True" Background="{x:Null}" BorderThickness="0" />
+                    <local:InFileSearchControl x:Name="ucInFileSearch" DockPanel.Dock="Bottom" Loaded="ucInFileSearch_Loaded" Text="{Binding Text}" CurrentOccurrence="{Binding CurrentOccurrence, Mode=OneWayToSource, Converter={StaticResource cvtOccurrenceToOccurrenceViewModel}}"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <local:TextViewerControl x:Name="fdsvFileViewer" Grid.Column="1" DockPanel.Dock="Top" ShowLineNumbers="True" Text="{Binding Text}" Highlighter="{Binding Highlighter}" FontFamily="Consolas" FontSize="11" Margin="0,5,0,5" ContextMenuOpening="TextViewerControl_ContextMenuOpening" ContextMenu="{StaticResource ctxTagUrlNavigator}" TextMouseDown="fdsvFileViewer_TextMouseDown" QueryCursor="fdsvFileViewer_QueryCursor" PreviewKeyDown="fdsvFileViewer_PreviewKeyDown" Loaded="fdsvFileViewer_Loaded">
+                            <local:TextViewerControl.BackgroundHighlightLayers>
+                                <local:HighlightLayer HighlightBrush="Yellow" Ranges="{Binding OccurrenceRanges}"/>
+                                <local:HighlightLayer HighlightBrush="{Binding ElementName=ucInFileSearch, Path=Searches[0].HighlightBrush, Mode=OneWay}" Ranges="{Binding ElementName=ucInFileSearch, Path=Searches[0].Occurrences, Converter={StaticResource cvtOccurrenceToOccurrenceRange}}"/>
+                                <local:HighlightLayer HighlightBrush="{Binding ElementName=ucInFileSearch, Path=Searches[1].HighlightBrush, Mode=OneWay}" Ranges="{Binding ElementName=ucInFileSearch, Path=Searches[1].Occurrences, Converter={StaticResource cvtOccurrenceToOccurrenceRange}}"/>
+                                <local:HighlightLayer HighlightBrush="{Binding ElementName=ucInFileSearch, Path=Searches[2].HighlightBrush, Mode=OneWay}" Ranges="{Binding ElementName=ucInFileSearch, Path=Searches[2].Occurrences, Converter={StaticResource cvtOccurrenceToOccurrenceRange}}"/>
+                                <local:HighlightLayer HighlightBrush="{Binding ElementName=ucInFileSearch, Path=Searches[3].HighlightBrush, Mode=OneWay}" Ranges="{Binding ElementName=ucInFileSearch, Path=Searches[3].Occurrences, Converter={StaticResource cvtOccurrenceToOccurrenceRange}}"/>
+                                <local:HighlightLayer HighlightBrush="{Binding ElementName=ucInFileSearch, Path=Searches[4].HighlightBrush, Mode=OneWay}" Ranges="{Binding ElementName=ucInFileSearch, Path=Searches[4].Occurrences, Converter={StaticResource cvtOccurrenceToOccurrenceRange}}"/>
+                                <local:HighlightLayer HighlightBrush="{Binding ElementName=ucInFileSearch, Path=Searches[5].HighlightBrush, Mode=OneWay}" Ranges="{Binding ElementName=ucInFileSearch, Path=Searches[5].Occurrences, Converter={StaticResource cvtOccurrenceToOccurrenceRange}}"/>
+                                <local:HighlightLayer HighlightBrush="{Binding ElementName=ucInFileSearch, Path=Searches[6].HighlightBrush, Mode=OneWay}" Ranges="{Binding ElementName=ucInFileSearch, Path=Searches[6].Occurrences, Converter={StaticResource cvtOccurrenceToOccurrenceRange}}"/>
+                                <local:HighlightLayer HighlightBrush="{Binding ElementName=ucInFileSearch, Path=Searches[7].HighlightBrush, Mode=OneWay}" Ranges="{Binding ElementName=ucInFileSearch, Path=Searches[7].Occurrences, Converter={StaticResource cvtOccurrenceToOccurrenceRange}}"/>
+                            </local:TextViewerControl.BackgroundHighlightLayers>
+                        </local:TextViewerControl>
+                        <Button Focusable="False" Height="17" Width="17" Command="Find" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.Column="1" Margin="0,5,0,5">
+                            <Image UseLayoutRounding="True" SnapsToDevicePixels="True" Source="/CodeXCavator.UI;component/Images/find.png" />
+                        </Button>
+                        <local:OccurrenceControl x:Name="occOccurrences" Grid.Column="2" LineCount="{Binding LineCount}" Occurrences="{Binding OccurrenceModels}" SelectedOccurrence="{Binding CurrentOccurrence, Mode=TwoWay}" Width="22" Margin="0,5,5,5" Background="LightGray">
+                            <local:OccurrenceControl.Foreground>
+                                <LinearGradientBrush EndPoint="0,0" StartPoint="0,1">
+                                    <GradientStop Color="Green" Offset="0" />
+                                    <GradientStop Color="Orange" Offset="1" />
+                                </LinearGradientBrush>
+                            </local:OccurrenceControl.Foreground>
+                        </local:OccurrenceControl>
+                        <local:OccurrenceControl x:Name="occInFileOccurrences" Grid.Column="2" LineCount="{Binding LineCount}" Occurrences="{Binding ElementName=ucInFileSearch,Path=CurrentSearch.Occurrences}" SelectedOccurrence="{Binding CurrentOccurrence, Mode=TwoWay}" Width="14" Margin="0,5,5,5" Background="{x:Null}" Foreground="{Binding ElementName=ucInFileSearch,Path=CurrentSearch.HighlightBrush}" HorizontalAlignment="Right">
+                        </local:OccurrenceControl>
+                    </Grid>                    
+                </DockPanel>
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Text}" Value="{x:Null}">
+                    <Setter TargetName="fdsvFileViewer" Property="Visibility" Value="Hidden"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="30*"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="80*"/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50*"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="50*"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TabControl SelectedIndex="{Binding CurrentSearch.CurrentSearchProcessorIndex}">
+                    <TabItem Header="Full search">
+                        <StackPanel Orientation="Vertical">
+                            <Label Padding="0,5,0,5">
+                                <DockPanel>
+                                    <Image Source="/CodeXCavator.UI;component/Images/magnifier.png" Stretch="None" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Margin="0,0,5,0"/>
+                                    <TextBlock Text="Search query:" FontWeight="Bold"/>
+                                </DockPanel>
+                            </Label>
+                            <DockPanel LastChildFill="True">
+                                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                                    <Button Style="{StaticResource stlSearchButton}" Margin="2,0,0,0" ToolTip="Click here to search file content." Command="{Binding CurrentSearch.CurrentSearchProcessor.SearchCommand}"/>
+                                    <CheckBox Style="{StaticResource stlImmediateSearchCheckBox}" ToolTip="Click here to toggle immediate search." Margin="2,0,0,0" IsChecked="{Binding CurrentSearch.CurrentSearchProcessor.ImmediateSearch, Mode=TwoWay}"/>
+                                    <Separator Margin="5,0,5,0" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
+                                    <local:OptionsControl OptionsProvider="{Binding CurrentSearch.CurrentSearchProcessor.SearchOptions}" Margin="0,0,0,0"></local:OptionsControl>
+                                </StackPanel>
+                                <TextBox x:Name="SearchQueryTextBox" DockPanel.Dock="Left" Text="{Binding CurrentSearch.CurrentSearchProcessor.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Validation.ErrorTemplate="{StaticResource ctpValidation}" ToolTip="{StaticResource ttpSearchQuery}" Tag="{Binding CurrentSearch.CurrentSearchProcessor}" PreviewKeyDown="searchTextBox_PreviewKeyDown" />
+                            </DockPanel>
+                        </StackPanel>
+                    </TabItem>
+                    <TabItem Header="Tag search">
+                        <StackPanel Orientation="Vertical">
+                            <Label Padding="0,5,0,5">
+                                <DockPanel>
+                                    <Image Source="/CodeXCavator.UI;component/Images/magnifier.png" Stretch="None" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Margin="0,0,5,0"/>
+                                    <TextBlock Text="Search query:" FontWeight="Bold"/>
+                                </DockPanel>
+                            </Label>
+                            <DockPanel LastChildFill="True">
+                                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                                    <Button Style="{StaticResource stlSearchButton}" Margin="2,0,0,0" ToolTip="Click here to search file content for tags." Command="{Binding CurrentSearch.CurrentSearchProcessor.SearchCommand}"/>
+                                    <CheckBox Style="{StaticResource stlImmediateSearchCheckBox}" ToolTip="Click here to toggle immediate search." Margin="2,0,0,0" IsChecked="{Binding CurrentSearch.CurrentSearchProcessor.ImmediateSearch, Mode=TwoWay}"/>
+                                    <Separator Margin="5,0,5,0" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
+                                    <local:OptionsControl OptionsProvider="{Binding CurrentSearch.CurrentSearchProcessor.SearchOptions}" Margin="0,0,0,0"></local:OptionsControl>
+                                </StackPanel>
+                                <TextBox Text="{Binding CurrentSearch.CurrentSearchProcessor.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Validation.ErrorTemplate="{StaticResource ctpValidation}" ToolTip="{StaticResource ttpSearchQuery}" Tag="{Binding CurrentSearch.CurrentSearchProcessor}" PreviewKeyDown="searchTextBox_PreviewKeyDown" />
+                            </DockPanel>
+                            <Label Padding="0,5,0,5">
+                                <DockPanel>
+                                    <Image Source="/CodeXCavator.UI;component/Images/tag.png" Stretch="None" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Margin="0,0,5,0"/>
+                                    <TextBlock Text="Tags:" FontWeight="Bold"/>
+                                </DockPanel>
+                            </Label>                            
+                            <ItemsControl ItemsSource="{Binding CurrentSearch.CurrentIndex.Tags}" HorizontalAlignment="Stretch" Grid.IsSharedSizeScope="True">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>                                    
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition SharedSizeGroup="Tags"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Margin="2,0,2,2" BorderThickness="1" BorderBrush="Brown" Padding="5,2,5,2" CornerRadius="2">
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0.5,0.0" EndPoint="0.5,1.0" >
+                                                        <GradientStop Color="White" Offset="0" />
+                                                        <GradientStop Color="Orange" Offset="1" />
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                                <DockPanel LastChildFill="True">
+                                                    <Button DockPanel.Dock="Right" x:Name="btnNavigateToUrl" Padding="0" HorizontalContentAlignment="Center" Margin="2,0,0,0" Click="btnNavigateToUrl_Click" Visibility="{Binding Links, Converter={StaticResource cvtEnumerableToVisibility}}" ContextMenu="{StaticResource ctxTagUrlNavigator}" ToolTip="Click here to navigate to URLs associated with tag.">
+                                                        <Image Source="/CodeXCavator.UI;component/Images/arrow_right.png" Stretch="Uniform" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Width="12" Height="12"/>
+                                                    </Button>
+                                                    <Button DockPanel.Dock="Right" x:Name="btnSearchTag" Padding="0" HorizontalContentAlignment="Center" Margin="10,0,0,0" Click="btnSearchTag_Click" ToolTip="Click here to search tag.">
+                                                        <Image Source="/CodeXCavator.UI;component/Images/magnifier.png" Stretch="Uniform" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Width="12" Height="12"/>
+                                                    </Button>
+                                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Tag}" VerticalAlignment="Center">
+                                                        <TextBlock.ToolTip>
+                                                            <StackPanel Orientation="Vertical">
+                                                                <TextBlock Text="{Binding TotalCount, StringFormat=Total number of occurrences: {0}}"/>
+                                                                <TextBlock Text="{Binding DocumentCount, StringFormat=Contained in documents: {0}}"/>
+                                                            </StackPanel>
+                                                        </TextBlock.ToolTip>
+                                                    </TextBlock>                                                    
+                                                </DockPanel>
+                                            </Border>                                        
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </TabItem>                        
+                </TabControl>
+                <StackPanel Grid.Row="1" Orientation="Vertical">
+                    <Label Padding="0,5,0,5" HorizontalContentAlignment="Stretch">
+                        <DockPanel LastChildFill="True">
+                            <Image Source="/CodeXCavator.UI;component/Images/doc_tag.png" Stretch="None" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Margin="0,0,5,0"/>
+                            <Button Style="{StaticResource stlUpdateIndex}" Margin="0,0,5,0" DockPanel.Dock="Right" ToolTip="Click here to update index file." Command="{Binding CurrentSearch.UpdateIndexCommand}"/>
+                            <CheckBox x:Name = "ReOpenNextTimeCheckBox" ToolTip="Automatically reopen last selected index on startup if no command line index is given."  VerticalAlignment="Center" Checked = "ReOpenNextTimeCheckBox_HandleCheck"  Unchecked = "ReOpenNextTimeCheckBox_HandleUnchecked"  Margin="0,0,5,0" DockPanel.Dock="Right"/>
+                            <Button Style="{StaticResource stlOpenCreateIndex}" Margin="0,0,5,0" DockPanel.Dock="Right" ToolTip="Open or create a new index file." Command="{Binding CurrentSearch.OpenCreateIndexCommand}"/>
+                            <TextBlock Text="Index:" FontWeight="Bold"/>
+                        </DockPanel>                        
+                    </Label>
+                    <ComboBox ItemsSource="{Binding Indexes}" SelectedValue="{Binding CurrentSearch.CurrentIndex}" TextSearch.TextPath="Name" IsEditable="True">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="{Binding Name}"/>
+                                    <TextBlock Text="{Binding Path}" FontSize="10" Foreground="Gray"/>
+                                    <TextBlock Text="{Binding LastUpdateTime, StringFormat=Last updated: {0}}" FontSize="10" Foreground="Gray"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                        <ComboBox.ToolTip>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="Use the combobox to select the index, which should be searched."/>
+                                <TextBlock Text="Current index:" Margin="0,5,0,0" FontWeight="Bold"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding CurrentSearch.CurrentIndex.Name}"/>
+                                    <TextBlock Text=" - "/>
+                                    <TextBlock Text="{Binding CurrentSearch.CurrentIndex.Path}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </ComboBox.ToolTip>
+                    </ComboBox>
+                    <TextBlock Text="{Binding CurrentSearch.CurrentIndex.LastUpdateTime, StringFormat=Last updated: {0}}" TextAlignment="Left" FontSize="10" Margin="5,0,5,0"/>
+                </StackPanel>
+                <DockPanel Grid.Row="2" LastChildFill="True">
+                    <Label DockPanel.Dock="Top" Padding="0,5,0,5" HorizontalContentAlignment="Stretch">
+                        <DockPanel LastChildFill="True">
+                            <Image Stretch="None" Source="/CodeXCavator.UI;component/Images/asterisk_orange.png" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Margin="0,0,5,0"/>
+                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource stlFilterCheckBox}" IsChecked="{Binding CurrentSearch.IsFilterByFileTypeEnabled}" ToolTip="Click here to toggle filtering by file type."/>
+                            <TextBlock Text="File types:" FontWeight="Bold"/>
+                        </DockPanel>
+                    </Label>
+                    <CheckBox Content="All" IsChecked="{Binding CurrentSearch.EnableAllFileTypes}" DockPanel.Dock="Bottom" Margin="4,0,0,5" ToolTip="Click to either check or uncheck all file types."/>
+                    <ListBox DockPanel.Dock="Top" ItemsSource="{Binding Source={StaticResource cvsFileTypes}}" ToolTip="Select the file types here, to which the search should be limited." Margin="0,0,0,5" AlternationCount="2" IsTextSearchEnabled="True" TextSearch.TextPath="FileType" SelectionMode="Extended" Name="lbFileTypes" PreviewKeyDown="lbFileTypes_PreviewKeyDown">
+                        <ListBox.Resources>
+                            <Style  TargetType="{x:Type ListBoxItem}">
+                                <Style.Triggers>
+                                    <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                                        <Setter Property="Background" Value="#400080ff"></Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListBox.Resources>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding Enabled}" Name="chkFileTypeEnabled" Click="chkFileTypeEnabled_Click" Focusable="False">
+                                    <CheckBox.Content>
+                                        <StackPanel Orientation="Horizontal" Focusable="False">
+                                            <Image Stretch="None" Source="{Binding FileType, Converter={StaticResource cvtFileNameToImageSource}}" UseLayoutRounding="True" SnapsToDevicePixels="True" Margin="0,2,5,2" Focusable="False" />
+                                            <TextBlock Text="{Binding FileType}" Focusable="False" />
+                                        </StackPanel>
+                                    </CheckBox.Content>
+                                </CheckBox>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+                <GridSplitter Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext">
+                    <GridSplitter.Background>
+                        <LinearGradientBrush EndPoint="0.5,0" StartPoint="0.5,1.0">
+                            <GradientStop Color="#00000000" Offset="0" />
+                            <GradientStop Color="#40000000" Offset="0.5"/>
+                            <GradientStop Color="#00000000" Offset="1" />
+                        </LinearGradientBrush>
+                    </GridSplitter.Background>
+                </GridSplitter>
+                <DockPanel Grid.Row="4" LastChildFill="True">
+                    <Label DockPanel.Dock="Top" Padding="0,5,0,5" HorizontalContentAlignment="Stretch">
+                        <DockPanel LastChildFill="True">
+                            <Image Source="/CodeXCavator.UI;component/Images/folder.png" Stretch="None" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Margin="0,0,5,0"/>
+                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource stlFilterCheckBox}" IsChecked="{Binding CurrentSearch.IsFilterByDirectoriesEnabled}" ToolTip="Click here to toggle filtering by directory."/>
+                            <TextBlock Text="Directories:" FontWeight="Bold"/>
+                        </DockPanel>
+                    </Label>
+                    <DataGrid x:Name="dtaDirectories" DockPanel.Dock="Bottom" ItemsSource="{Binding CurrentSearch.Directories}" ToolTip="Enter directories here to which the search should be limited." AlternationCount="2" AlternatingRowBackground="#400080ff" CanUserAddRows="True" CanUserDeleteRows="True" AutoGenerateColumns="False" GridLinesVisibility="None">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn CanUserResize="False" CanUserReorder="False">
+                                <DataGridTemplateColumn.Header>
+                                    <Button ToolTip="Click to remove all or all selected entries from the directory filter list." Tag="{Binding}" Click="btnRemoveAllDirectories_Click" Focusable="False" MaxWidth="18">
+                                        <Image UseLayoutRounding="True" SnapsToDevicePixels="True" Source="/CodeXCavator.UI;component/Images/cross.png" Width="12" Height="12"/>
+                                    </Button>
+                                </DataGridTemplateColumn.Header>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button ToolTip="Click to remove the directory from the directory filter list." Tag="{Binding}" Click="btnRemoveDirectory_Click" Visibility="{Binding Converter={StaticResource cvtItemTypeToVisibility}}" Focusable="False" MaxWidth="18">
+                                            <Image UseLayoutRounding="True" SnapsToDevicePixels="True" Source="/CodeXCavator.UI;component/Images/cross.png" Width="12" Height="12"/>
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Binding="{Binding Pattern}">
+                                <DataGridTextColumn.Header>
+                                    <TextBlock Text="Pattern" ToolTip="Enter a wild card directory pattern here"/>
+                                </DataGridTextColumn.Header>
+                            </DataGridTextColumn>
+                            <DataGridTemplateColumn>
+                                <DataGridTemplateColumn.Header>
+                                    <TextBlock Text="Recursive" ToolTip="Toggles whether sub directories should be included, or not."/>
+                                </DataGridTemplateColumn.Header>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding Recursive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn>
+                                <DataGridTemplateColumn.Header>
+                                    <TextBlock Text="Exclusive" ToolTip="Toggles whether the directory should be excluded or included."/>
+                                </DataGridTemplateColumn.Header>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding Exclusive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Grid>
+            <GridSplitter Margin="5,0,5,0" Grid.Row="1" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" HorizontalAlignment="Stretch" BorderBrush="#80000000">
+                <GridSplitter.Background>
+                    <LinearGradientBrush EndPoint="0.5,0" StartPoint="0.5,1.0">
+                        <GradientStop Color="#00000000" Offset="0" />
+                        <GradientStop Color="#40000000" Offset="0.5"/>
+                        <GradientStop Color="#00000000" Offset="1" />
+                    </LinearGradientBrush>
+                </GridSplitter.Background>
+            </GridSplitter>
+            <DockPanel Grid.Row="2" LastChildFill="True" Margin="5" HorizontalAlignment="Stretch">
+                <Label DockPanel.Dock="Top" Padding="0,5,0,5" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">                    
+                    <DockPanel LastChildFill="True" HorizontalAlignment="Stretch">
+                        <Image DockPanel.Dock="Left" Source="/CodeXCavator.UI;component/Images/page.png" Stretch="None" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Margin="0,0,5,0"/>
+                        <CheckBox DockPanel.Dock="Right" Style="{StaticResource stlFilterCheckBox}" IsChecked="{Binding CurrentSearch.IsFilterByFileListEnabled}" ToolTip="Click here to toggle filtering by file list." Visibility="Collapsed"/>
+                        <TextBlock DockPanel.Dock="Right" Text="{Binding CurrentSearch.CurrentIndex.FileCount, StringFormat=Total: {0}}"/>
+                        <TextBlock DockPanel.Dock="Left" Text="Files:" FontWeight="Bold"/>
+                    </DockPanel>
+                </Label>
+                <Label DockPanel.Dock="Top" Padding="0,0,0,5" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Visibility="{Binding CurrentSearch.ShowFileSearchInfo, Converter={StaticResource cvtBooleanToVisibility}}">
+                    <DockPanel LastChildFill="True" HorizontalAlignment="Stretch">
+                        <ContentControl DockPanel.Dock="Right" Content="{Binding}" HorizontalAlignment="Right" Width="Auto" Height="Auto">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock x:Name="tbFileMatchCount" Text="{Binding CurrentSearch.FileSearchProcessor.SearchResultCount, StringFormat=Matching files: {0}}" HorizontalAlignment="Right"/>
+                                        <Canvas x:Name="cnvSpinnerFileMatchCount" Width="9" Height="9" VerticalAlignment="Center" HorizontalAlignment="Right" RenderTransformOrigin="0.5,0.5" Visibility="Collapsed">
+                                            <Canvas.RenderTransform>
+                                                <RotateTransform x:Name="trfmSpinnerFileMatchCount"/>
+                                            </Canvas.RenderTransform>
+                                            <Ellipse Margin="0,0,0,0" Width="4" Height="4" Fill="#600076FF" />
+                                            <Ellipse Margin="5,0,0,0" Width="4" Height="4" Fill="#A00076FF"/>
+                                            <Ellipse Margin="5,5,0,0" Width="4" Height="4" Fill="#C00076FF"/>
+                                            <Ellipse Margin="0,5,0,0" Width="4" Height="4" Fill="#FF0076FF"/>
+                                        </Canvas>
+                                    </StackPanel>
+                                    <DataTemplate.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding CurrentSearch.FileSearchProcessor.SearchResultCount}" Value="{x:Null}"/>
+                                                <Condition Binding="{Binding CurrentSearch.FileSearchProcessor.IsSearching}" Value="true"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <MultiDataTrigger.EnterActions>
+                                                <BeginStoryboard x:Name="stbSpinnerFileMatchCount">
+                                                    <BeginStoryboard.Storyboard>
+                                                        <Storyboard RepeatBehavior="Forever">
+                                                            <DoubleAnimation Storyboard.TargetName="trfmSpinnerFileMatchCount" Storyboard.TargetProperty="Angle" From="0" To="360"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard.Storyboard>
+                                                </BeginStoryboard>
+                                            </MultiDataTrigger.EnterActions>
+                                            <MultiDataTrigger.ExitActions>
+                                                <StopStoryboard BeginStoryboardName="stbSpinnerFileMatchCount">
+                                                </StopStoryboard>
+                                            </MultiDataTrigger.ExitActions>
+                                            <MultiDataTrigger.Setters>
+                                                <Setter TargetName="cnvSpinnerFileMatchCount" Property="Visibility" Value="Visible"/>
+                                            </MultiDataTrigger.Setters>
+                                        </MultiDataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding CurrentSearch.FileSearchProcessor.SearchResultsQuery, StringFormat=Search results: {0}}" FontWeight="Bold"/>
+                    </DockPanel>
+                </Label>
+                <StackPanel Orientation="Vertical" DockPanel.Dock="Bottom">
+                    <Label Padding="0,5,0,5">
+                        <DockPanel>
+                            <Image Source="/CodeXCavator.UI;component/Images/magnifier.png" Stretch="None" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Margin="0,0,5,0"/>
+                            <TextBlock Text="File search query:" FontWeight="Bold"/>
+                        </DockPanel>
+                    </Label>
+                    <DockPanel LastChildFill="True">
+                        <CheckBox DockPanel.Dock="Right" Style="{StaticResource stlImmediateSearchCheckBox}" ToolTip="Click here to toggle immediate search." Margin="2,0,0,0" IsChecked="{Binding CurrentSearch.FileSearchProcessor.ImmediateSearch, Mode=TwoWay}"/>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource stlSearchButton}" Margin="2,0,0,0" ToolTip="Click here to search file list." Command="{Binding CurrentSearch.FileSearchProcessor.SearchCommand}"/>
+                        <TextBox Text="{Binding CurrentSearch.FileSearchProcessor.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Validation.ErrorTemplate="{StaticResource ctpValidation}" ToolTip="{StaticResource ttpSearchQuery}" Tag="{Binding CurrentSearch.FileSearchProcessor}" PreviewKeyDown="searchTextBox_PreviewKeyDown" />
+                    </DockPanel>
+                </StackPanel>
+                <ListBox x:Name="lbFiles" DockPanel.Dock="Bottom" ItemsSource="{Binding Source={StaticResource cvsFiles}}" ScrollViewer.HorizontalScrollBarVisibility="Visible" AlternationCount="2" SelectedValue="{Binding CurrentSearch.SelectedFile}" MouseDoubleClick="lbFiles_MouseDoubleClick">
+                    <ListBox.ToolTip>
+                        <TextBlock>
+                            List of files contained in the current index.
+                        </TextBlock>
+                    </ListBox.ToolTip>
+                    <ListBox.Resources>
+                        <Style  TargetType="{x:Type ListBoxItem}">
+                            <Style.Triggers>
+                                <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                                    <Setter Property="Background" Value="#400080ff"></Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.Resources>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
+                                <Button Focusable="False" Margin="0,0,2,0" ToolTip="Click to open to the file." Tag="{Binding FilePath}" Click="btnOpenFileClick">
+                                    <Image Source="/CodeXCavator.UI;component/Images/eye.png" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Width="12" Height="12"/>
+                                </Button>
+                                <Button Focusable="False" Margin="0,0,5,0" ToolTip="Click to add the directory of the file to the directory filter." Tag="{Binding FilePath}" Click="btnAddDirectory_Click">
+                                    <Image Source="/CodeXCavator.UI;component/Images/funnel.png" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Width="12" Height="12"/>
+                                </Button>
+                                <Image Stretch="None" Source="{Binding FilePath, Converter={StaticResource cvtFileNameToImageSource}}" UseLayoutRounding="True" SnapsToDevicePixels="True" ContextMenu="{StaticResource ctxDocument}"/>
+                                <ContentControl Content="{Binding FormattedFilePath}" ToolTip="{Binding FilePath}" ContextMenu="{StaticResource ctxDocument}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Grid>
+        <GridSplitter Grid.Column="1" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext" HorizontalAlignment="Stretch" BorderBrush="#80000000" Margin="0,5,0,5">
+            <GridSplitter.Background>
+                <LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
+                    <GradientStop Color="#00000000" Offset="0" />
+                    <GradientStop Color="#40000000" Offset="0.5"/>
+                    <GradientStop Color="#00000000" Offset="1" />
+                </LinearGradientBrush>
+            </GridSplitter.Background>
+        </GridSplitter>
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50*"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="50*"/>
+            </Grid.RowDefinitions>
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Padding="0,5,0,5" HorizontalContentAlignment="Stretch">
+                    <DockPanel HorizontalAlignment="Stretch">
+                        <Image DockPanel.Dock="Left" Source="/CodeXCavator.UI;component/Images/eye.png" Stretch="None" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Margin="0,0,5,0"/>
+                        <TextBlock DockPanel.Dock="Left" Text="Viewer:" FontWeight="Bold"/>
+                        <Image x:Name="imgInfo" DockPanel.Dock="Right" Source="/CodeXCavator.UI;component/Images/exclamation.png" Stretch="None" HorizontalAlignment="Right" MouseLeftButtonDown="imgInfo_MouseLeftButtonDown" MouseLeave="imgInfo_MouseLeave">
+                            <Image.ToolTip>
+                                <ToolTip>
+                                    <StackPanel Orientation="Vertical" ToolTipService.ShowDuration="5000" Margin="0,5,0,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="/CodeXCavator.UI;component/Images/logo.png" Stretch="None" VerticalAlignment="Top" Margin="0,0,5,0"/>
+                                            <TextBlock TextAlignment="Justify" MaxWidth="400" TextWrapping="Wrap" VerticalAlignment="Center">
+                                                <Run FontSize="16" FontWeight="Bold" Foreground="White">CodeXCavator</Run><LineBreak/>
+                                                <Bold Foreground="White">Version:</Bold> <Run Foreground="White">0.10.0.10(alpha)</Run><LineBreak/>                                    
+                                            </TextBlock>
+                                            <StackPanel.Background>
+                                                <LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
+                                                    <GradientStop Color="#C01E90FF" Offset="0.5" />
+                                                    <GradientStop Color="#001E90FF" Offset="1" />
+                                                </LinearGradientBrush>
+                                            </StackPanel.Background>
+                                        </StackPanel>
+                                        <TextBlock TextAlignment="Justify" MaxWidth="400" TextWrapping="Wrap">
+                                        A tool for source code indexing and full text search using the <Bold>Lucene</Bold> library from the <Bold>Apache Software Foundation</Bold>.<LineBreak/>
+                                        <LineBreak/>
+                                        <Bold>Icons:</Bold> LED Icon Set v1.0 - http://led24.de/iconset/<LineBreak/>
+                                        <LineBreak/>
+                                        <Bold>License:</Bold><LineBreak/>
+                                        <Bold>Copyright 2014 Christoph Brzozowski</Bold><LineBreak/>
+                                        <Bold>This version was modified by Ben van der Merwe, 2018, 2019</Bold><LineBreak/>
+                                        <LineBreak/>
+                                        Licensed under the <Bold>Apache License, Version 2.0</Bold> (the "License");
+                                        you may not use this file except in compliance with the License.
+                                        You may obtain a copy of the License at<LineBreak/>
+                                        <LineBreak/>
+                                            <Run>http://www.apache.org/licenses/LICENSE-2.0</Run><LineBreak/>
+                                        <LineBreak/>
+                                        Unless required by applicable law or agreed to in writing, software
+                                        distributed under the License is distributed on an "AS IS" BASIS,
+                                        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                                        See the License for the specific language governing permissions and
+                                        limitations under the License.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </Image.ToolTip>
+                        </Image>                        
+                    </DockPanel>
+                </Label>
+                <TabControl Grid.Row="1" ItemsSource="{Binding OpenDocuments}" SelectedValue="{Binding CurrentDocument}">
+                    <TabControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Margin="0,0,5,0" ContextMenu="{StaticResource ctxDocument}">
+                                    <DockPanel Margin="0,0,0,0" ToolTip="{Binding FilePath}" LastChildFill="True">
+                                    <Image DockPanel.Dock="Left" Stretch="None" Source="{Binding Path=Name, Converter={StaticResource cvtFileNameToImageSource}}" UseLayoutRounding="True" SnapsToDevicePixels="True" Margin="0,0,5,0"/>
+                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Name}"/>
+                                </DockPanel>
+                            </Label>
+                            <Button Focusable="False" Height="18" Width="18" Click="CloseDocumentButton_Click">
+                                <Image UseLayoutRounding="True" SnapsToDevicePixels="True" Source="/CodeXCavator.UI;component/Images/cross.png" />
+                            </Button>
+                            </StackPanel>
+                        </DataTemplate>
+                    </TabControl.ItemTemplate>
+                    <TabControl.ContentTemplate>
+                        <DataTemplate>
+                            <ContentControl DockPanel.Dock="Top" Content="{Binding FileViewer}"/>
+                        </DataTemplate>
+                    </TabControl.ContentTemplate>
+                </TabControl>
+            </Grid>
+            <GridSplitter Grid.Row="1" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" HorizontalAlignment="Stretch" BorderBrush="#80000000" Margin="5,0,5,0">
+                <GridSplitter.Background>
+                    <LinearGradientBrush EndPoint="0.5,0" StartPoint="0.5,1.0">
+                        <GradientStop Color="#00000000" Offset="0" />
+                        <GradientStop Color="#40000000" Offset="0.5"/>
+                        <GradientStop Color="#00000000" Offset="1" />
+                    </LinearGradientBrush>
+                </GridSplitter.Background>
+            </GridSplitter>
+            <TabControl ItemsSource="{Binding Searches}" SelectedItem="{Binding CurrentSearch}" Grid.Row="2" Margin="5">
+                <TabControl.Resources>
+                    <Style TargetType="TabItem">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                <DataTrigger.Setters>
+                                    <Setter Property="Focusable" Value="false"/>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TabControl.Resources>
+                <TabControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+                            <Image x:Name="imgIcon" Source="/CodeXCavator.UI;component/Images/magnifier.png" Stretch="None" Margin="0,0,2,0" UseLayoutRounding="False" SnapsToDevicePixels="True" VerticalAlignment="Top"/>
+                            <TextBlock x:Name="tbLabel" Text="{Binding CurrentSearchProcessor.SearchQuery}" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <Button x:Name="btTabAction" Command="{Binding RelativeSource={RelativeSource AncestorType=TabControl, AncestorLevel=1}, Path=DataContext.RemoveSearchCommand}" CommandParameter="{Binding}" VerticalAlignment="Center" ToolTip="Closes the search tab.">
+                                <Image Source="/CodeXCavator.UI;component/Images/cross.png" SnapsToDevicePixels="False" UseLayoutRounding="False" Width="12" Height="12">
+                                    <Image.Style>
+                                        <Style TargetType="Image">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsEnabled" Value="false">
+                                                    <Trigger.Setters>
+                                                        <Setter Property="Opacity" Value="0.5"/>
+                                                    </Trigger.Setters>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+                            </Button>
+                        </StackPanel>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                <Setter TargetName="imgIcon" Property="Visibility" Value="Collapsed" />
+                                <Setter TargetName="tbLabel" Property="Visibility" Value="Collapsed" />
+                                <Setter TargetName="btTabAction" Property="Content">
+                                    <Setter.Value>
+                                        <Image Source="/CodeXCavator.UI;component/Images/add.png" SnapsToDevicePixels="False" UseLayoutRounding="False" Width="12" Height="12"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="btTabAction" Property="ToolTip" Value="Opens a new search tab."/>
+                                <Setter TargetName="btTabAction" Property="Command" Value="{Binding RelativeSource={RelativeSource AncestorType=TabControl, AncestorLevel=1}, Path=DataContext.AddSearchCommand}">
+                                </Setter>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </TabControl.ItemTemplate>
+                <TabControl.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Label Grid.Row="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                <Label.Content>
+                                    <DockPanel UseLayoutRounding="True">
+                                        <ContentPresenter DockPanel.Dock="Left" Margin="0,0,5,0" Width="Auto" Height="Auto" Content="{Binding}">
+                                            <ContentPresenter.ContentTemplate>
+                                                <DataTemplate>
+                                                    <Grid>
+                                                        <Image x:Name="icnFindDoc" DockPanel.Dock="Left" Source="/CodeXCavator.UI;component/Images/page.png" Stretch="None" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True">
+                                                            <Image.RenderTransform>
+                                                                <MatrixTransform x:Name="icnFindDocTrfm">
+                                                                    <MatrixTransform.Matrix>
+                                                                        <Matrix/>
+                                                                    </MatrixTransform.Matrix>
+                                                                </MatrixTransform>
+                                                            </Image.RenderTransform>
+                                                        </Image>
+                                                        <Image x:Name="icnFind" Source="/CodeXCavator.UI;component/Images/find.png" Stretch="Fill" VerticalAlignment="Top" Width="12.5" Height="12.5" Margin="4,4,0,0">
+                                                            <Image.RenderTransform>
+                                                                <MatrixTransform x:Name="icnFindTrfm">
+                                                                    <MatrixTransform.Matrix>
+                                                                        <Matrix/>
+                                                                    </MatrixTransform.Matrix>
+                                                                </MatrixTransform>
+                                                            </Image.RenderTransform>
+                                                        </Image>
+                                                    </Grid>
+                                                    <DataTemplate.Triggers>
+                                                        <DataTrigger Binding="{Binding CurrentSearchProcessor.IsSearching}" Value="True">
+                                                            <DataTrigger.EnterActions>
+                                                                <BeginStoryboard x:Name="stbAnimateFindIcon">
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation Storyboard.TargetName="icnFindDoc" Storyboard.TargetProperty="Opacity" From="0" To="1" RepeatBehavior="Forever" AutoReverse="True" Duration="0:0:1">
+                                                                            <DoubleAnimation.EasingFunction>
+                                                                                <PowerEase EasingMode="EaseInOut" Power="4" />
+                                                                            </DoubleAnimation.EasingFunction>
+                                                                        </DoubleAnimation>
+                                                                        <MatrixAnimationUsingPath Storyboard.TargetName="icnFindDocTrfm" Storyboard.TargetProperty="Matrix" FillBehavior="HoldEnd" RepeatBehavior="Forever" Duration="0:0:2">
+                                                                            <MatrixAnimationUsingPath.PathGeometry>
+                                                                                <PathGeometry>
+                                                                                    <PathFigure StartPoint="-5,0">
+                                                                                        <LineSegment Point="5,0"/>
+                                                                                    </PathFigure>
+                                                                                </PathGeometry>
+                                                                            </MatrixAnimationUsingPath.PathGeometry>
+                                                                        </MatrixAnimationUsingPath>
+                                                                        <MatrixAnimationUsingPath Storyboard.TargetName="icnFindTrfm" Storyboard.TargetProperty="Matrix" FillBehavior="HoldEnd" RepeatBehavior="Forever" Duration="0:0:2">
+                                                                            <MatrixAnimationUsingPath.PathGeometry>
+                                                                                <PathGeometry>
+                                                                                    <PathFigure StartPoint="0,0">
+                                                                                        <ArcSegment RotationAngle="0" Size="2,2" Point="0.001,0" IsLargeArc="True"/>
+                                                                                    </PathFigure>
+                                                                                </PathGeometry>
+                                                                            </MatrixAnimationUsingPath.PathGeometry>
+                                                                        </MatrixAnimationUsingPath>
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </DataTrigger.EnterActions>
+                                                            <DataTrigger.ExitActions>
+                                                                <StopStoryboard BeginStoryboardName="stbAnimateFindIcon"/>
+                                                            </DataTrigger.ExitActions>
+                                                        </DataTrigger>
+                                                    </DataTemplate.Triggers>
+                                                </DataTemplate>
+                                            </ContentPresenter.ContentTemplate>
+                                        </ContentPresenter>
+                                        <StackPanel Orientation="Vertical" DockPanel.Dock="Right" HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding CurrentSearchProcessor.SearchResultCount, StringFormat=Matching files: {0}}" HorizontalAlignment="Left"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <ContentControl Content="{Binding}" HorizontalAlignment="Left" Width="Auto" Height="Auto">
+                                                    <ContentControl.ContentTemplate>
+                                                        <DataTemplate>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock x:Name="tbTotalMatchCount" Text="{Binding CurrentSearchProcessor.TotalMatchCount, StringFormat=Total matches: {0}}" HorizontalAlignment="Left"/>
+                                                                <ProgressBar x:Name="prgTotalMatchCount" Height="10" Width="20" HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Collapsed" Maximum="100" Value="{Binding CurrentSearchProcessor.Progress, Mode=OneWay}"/>
+                                                            </StackPanel>
+                                                            <DataTemplate.Triggers>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding CurrentSearchProcessor.TotalMatchCount}" Value="{x:Null}"/>
+                                                                        <Condition Binding="{Binding CurrentSearchProcessor.IsCountingMatches}" Value="true"/>
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <MultiDataTrigger.Setters>
+                                                                        <Setter TargetName="prgTotalMatchCount" Property="Visibility" Value="Visible"/>
+                                                                    </MultiDataTrigger.Setters>
+                                                                </MultiDataTrigger>
+                                                            </DataTemplate.Triggers>
+                                                        </DataTemplate>
+                                                    </ContentControl.ContentTemplate>
+                                                </ContentControl>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <TextBlock DockPanel.Dock="Left" Text="{Binding CurrentSearchProcessor.SearchResultsQuery, StringFormat=Search results: {0}}" FontWeight="Bold"/>
+                                    </DockPanel>
+                                </Label.Content>
+                            </Label>
+                            <ListBox x:Name="vwSearchResults" Grid.Row="1" ItemsSource="{Binding Source={StaticResource cvsSearchResults}}" ScrollViewer.HorizontalScrollBarVisibility="Visible" AlternationCount="2" Grid.RowSpan="2" MouseDoubleClick="vwSearchResults_MouseDoubleClick">
+                                <ListBox.Resources>
+                                    <DataTemplate DataType="{x:Type viewmodel:SearchHitViewModel}">
+                                        <StackPanel Orientation="Vertical">
+                                            <Expander HorizontalContentAlignment="Stretch" IsExpanded="{Binding IsExpanded}">
+                                                <Expander.Header>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Button Focusable="False" Margin="0,0,2,0" ToolTip="Click to open to the file." Tag="{Binding}" Click="btnOpenFileWithSearchHitsClick">
+                                                            <Image Source="/CodeXCavator.UI;component/Images/eye.png" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Width="12" Height="12"/>
+                                                        </Button>
+                                                        <Button Focusable="False" Margin="0,0,2,0" ToolTip="Click to add the directory of the file to the directory filter." Tag="{Binding FilePath}" Click="btnAddDirectory_Click">
+                                                            <Image Source="/CodeXCavator.UI;component/Images/funnel.png" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Width="12" Height="12"/>
+                                                        </Button>
+                                                        <Button Focusable="False" Margin="0,0,5,0" ToolTip="Click to navigate to the file in the file list." Tag="{Binding FilePath}" Click="btnJumpToFile_Click">
+                                                            <Image Source="/CodeXCavator.UI;component/Images/arrow_right.png" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Width="12" Height="12"/>
+                                                        </Button>
+                                                        <TextBlock Text="{Binding NumberOfOccurrences, StringFormat=Matches: {0}}" VerticalAlignment="Center" Margin="4 0 8 0"/>
+                                                        <Image Stretch="None" Source="{Binding Path=FilePath, Converter={StaticResource cvtFileNameToImageSource}}" UseLayoutRounding="True" SnapsToDevicePixels="True" ContextMenu="{StaticResource ctxDocument}"/>
+                                                        <TextBlock Text="{Binding FilePath}" ContextMenu="{StaticResource ctxDocument}"/>
+                                                        <Canvas x:Name="cnvSpinner" Grid.Column="3" Grid.Row="0" Width="9" Height="9" VerticalAlignment="Center" HorizontalAlignment="Right" RenderTransformOrigin="0.5,0.5" Visibility="Collapsed">
+                                                            <Canvas.RenderTransform>
+                                                                <RotateTransform x:Name="trfmSpinner"/>
+                                                            </Canvas.RenderTransform>
+                                                            <Ellipse Margin="0,0,0,0" Width="4" Height="4" Fill="#600076FF" />
+                                                            <Ellipse Margin="5,0,0,0" Width="4" Height="4" Fill="#A00076FF"/>
+                                                            <Ellipse Margin="5,5,0,0" Width="4" Height="4" Fill="#C00076FF"/>
+                                                            <Ellipse Margin="0,5,0,0" Width="4" Height="4" Fill="#FF0076FF"/>
+                                                        </Canvas>
+                                                    </StackPanel>
+                                                </Expander.Header>
+                                            </Expander>
+                                        </StackPanel>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding Occurrences}" Value="{x:Null}">
+                                                <DataTrigger.EnterActions>
+                                                    <BeginStoryboard x:Name="stbSpinner">
+                                                        <BeginStoryboard.Storyboard>
+                                                            <Storyboard RepeatBehavior="Forever">
+                                                                <DoubleAnimation Storyboard.TargetName="trfmSpinner" Storyboard.TargetProperty="Angle" From="0" To="360"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard.Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.EnterActions>
+                                                <DataTrigger.ExitActions>
+                                                    <StopStoryboard BeginStoryboardName="stbSpinner">
+                                                    </StopStoryboard>
+                                                </DataTrigger.ExitActions>
+                                                <DataTrigger.Setters>
+                                                    <Setter TargetName="cnvSpinner" Property="Visibility" Value="Visible"/>
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                    <DataTemplate DataType="{x:Type viewmodel:OccurrenceViewModel}">
+                                        <Border BorderThickness="1" BorderBrush="#40000000">
+                                            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                                                <TextBlock Text="{Binding FilePath}" FontSize="9" Background="#40808080"/>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                                                    <Button Focusable="False" Margin="0,0,2,0" ToolTip="Click to open to the file and navigate to match." Tag="{Binding}" Click="btnOpenFileWithSearchHitsClick" VerticalAlignment="Center">
+                                                        <Image Source="/CodeXCavator.UI;component/Images/eye.png" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Width="12" Height="12"/>
+                                                    </Button>
+                                                    <TextBlock Text="{Binding Position}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                                    <Label Content="{Binding FormattedFragment}" FontFamily="Consolas" FontSize="14"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.Resources>
+                                <ListBox.ToolTip>
+                                    <TextBlock>
+                            Displays files containing hits of the current search query.
+                                    </TextBlock>
+                                </ListBox.ToolTip>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        <Style.Triggers>
+                                            <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                                                <Setter Property="Background" Value="{Binding Background}"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                            </ListBox>
+                            <ItemsControl Grid.Row="2" ItemsSource="{Binding SearchResultActions}">
+                            </ItemsControl>
+                        </Grid>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>                
+            </TabControl>
+        </Grid>
+    </Grid>
+</UserControl>
