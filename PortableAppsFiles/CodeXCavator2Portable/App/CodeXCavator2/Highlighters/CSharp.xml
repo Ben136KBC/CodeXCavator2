@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Highlighters>
+  <!-- CSharp highlighter -->
+  <Highlighter Type="RegexHighlighter" FileExtensions=".cs">
+    <Configuration CaseSensitive="true">
+      <Patterns>
+        <Pattern Token="LINE_COMMENT" RegEx="//.*$" Color="#ff808080"/>
+        <Pattern Token="GOTO_LABEL" RegEx="'\b*[_a-zA-Z][a-zA-Z_0-9\.]*\:" Color="#ff0000ff"/>
+        <Pattern Token="COMMENT_START" RegEx="/\*" Color="#ff808080"/>
+        <Pattern Token="COMMENT_END" RegEx="\*/" Color="#ff808080"/>
+        <Pattern Token="TAG" RegEx="\+\#[_a-zA-Z][a-zA-Z_0-9\.]*\#\+" Color="#ffff8000"/>
+        <Pattern Token="NUMBER_LITERAL" RegEx="0[xX][0-9A-Fa-f]+|[0-9]*\.?[0-9]*[eE]?[\+\-]?[0-9]+(U|u|L|l|UL|Ul|uL|ul|LU|Lu|lU|lu|F|f|D|d|M|m)?" Color="#ff0080ff"/>
+        <Pattern Token="STRING_LITERAL" RegEx="@\&quot;(?:\&quot;\&quot;|[^\&quot;\r\n])*\&quot;|\&quot;(?:\\.|[^\\\&quot;\r\n])*\&quot;" Color="#ffff00ff"/>
+        <Pattern Token="PREPROCESSOR_KEYWORD" RegEx="\#if|\#else|\#elif|\#endif|\#define|\#undef|\#warning|\#error|\#line|\#region|\#endregion|\#pragma\s+warning|\#pragma\s+checksum|\#pragma" Color="#ff800080"/>
+        <Pattern Token="OPERATOR" RegEx="\=|\-|\+|\?|\*|\/|\%|\&amp;|\||\^|\!|\~|\=\=|\!\=|\&gt;\=|\&lt;\=|\&amp;\=|\|\=|\+\=|\-\=|\+\+|\-\-|\*\=|\/\=" Color="#ff208000"/>
+        <Pattern Token="SEPARATOR" RegEx="\.|\,|\:|\;" Color="#ff008080"/>
+        <Pattern Token="IDENTIFIER" RegEx="[_\w^0-9][\w]*" Color="#ff000000"/>
+        <Pattern Token="KEYWORD" RegEx="internal|interface" Color="#ff0000ff"/>
+        <Pattern Token="KEYWORD_TYPE" RegEx="void|ushort|ulong|uint|string|short|sbyte|object|long|int|float|double|decimal|char|byte|bool" Color="#ffB08010"/>
+        <Pattern Token="KEYWORD" RegEx="yield|while|where|volatile|virtual|var|value|using|unsafe|unchecked|typeof|try|true|throw|this|switch|struct|static|stackalloc|sizeof|set|select|sealed|return|remove|ref|readonly|public|protected|private|partial|params|override|out|orderby|operator|null|new|namespace|lock|let|join|is|into|in|implicit|if|group|goto|global|get|from|foreach|for|fixed|finally|false|extern|explicit|event|enum|else|dynamic|do|descending|delegate|default|continue|const|class|checked|catch|case|break|base|await|async|ascending|as|alias|add|abstract" Color="#ff0000ff"/>
+        <Pattern Token="CHAR_LITERAL" RegEx="[@]?'(?:\\'|[^\\'\n\r])*?'" Color="#ffff00ff"/>
+        <Pattern Token="BRACE" RegEx="\{|\}|\(|\)|\[|\]|\&lt;|\&gt;" Color="#ff800000"/>
+      </Patterns>
+    </Configuration>
+  </Highlighter>
+</Highlighters>

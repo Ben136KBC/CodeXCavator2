@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Highlighters>
+  <!-- VisualBasic highlighter -->
+  <Highlighter Type="RegexHighlighter" FileExtensions=".bas;.cls;.frm;.ctl;.vbs">
+    <Configuration CaseSensitive="false">
+      <Patterns>
+        <Pattern Token="LINE_COMMENT" RegEx="'.*$|REM.*$" Color="#ff808080"/>
+        <Pattern Token="GOTO_LABEL" RegEx="'\b*[_a-zA-Z][a-zA-Z_0-9\.]*\:" Color="#ff0000ff"/>
+        <Pattern Token="TAG" RegEx="\+\#[_a-zA-Z][a-zA-Z_0-9\.]*\#\+" Color="#ffff8000"/>
+        <Pattern Token="GUID" RegEx="\{[0-9A-Fa-f]{8,8}-[0-9A-Fa-f]{4,4}-[0-9A-Fa-f]{4,4}-[0-9A-Fa-f]{4,4}-[0-9A-Fa-f]{12,12}\}" Color="#ffff0000"/>
+        <Pattern Token="NUMBER_LITERAL" RegEx="\&amp;[hH][0-9A-Fa-f]+|[0-9]*\.?[0-9]*[eE]?[\+\-]?[0-9]+(U|u|L|l|UL|Ul|uL|ul|LU|Lu|lU|lu|F|f|D|d|M|m)?" Color="#ff0080ff"/>
+        <Pattern Token="STRING_LITERAL" RegEx="\&quot;(?:[^\&quot;\r\n])*\&quot;" Color="#ffff00ff"/>
+        <Pattern Token="PREPROCESSOR_KEYWORD" RegEx="\#if|\#elseif|\#else|\#end if|\#const" Color="#ff800080"/>
+        <Pattern Token="SEPARATOR" RegEx="\.|\,|\:" Color="#ff008080"/>
+        <Pattern Token="OPERATOR" RegEx="\=|\-|\+|\?|\*|\/|\%|\&amp;|\^|\!|\~|\&gt;\=|\&lt;\=|\&lt;\&gt;|\$|\#" Color="#ff208000"/>
+        <Pattern Token="IDENTIFIER" RegEx="[_\w^0-9][\w]*" Color="#ff000000"/>
+        <Pattern Token="KEYWORD_TYPE" RegEx="boolean|currency|date|char|sbyte|byte|ushort|short|ulong|long|integer|uinteger|single|double|string|variant|object" Color="#ffB08010"/>
+        <Pattern Token="KEYWORD" RegEx="with|while|wend|version|to|type|then|true|sub|stop|step|set|select|resume|redim|public|property|private|option|on|null|nothing|next|me|loop|like|let|lib|iif|is|if|in|goto|global|get|function|false|friend|for|explicit|error|enum|end|exit|else|each|do|dim|declare|const|choose|class|case|byval|byref|begin|attribute|as|addressof" Color="#ff0000ff"/>
+        <Pattern Token="KEYWORD_OPERATOR" RegEx="and|not|xor|or|mod" Color="#ff00a080"/>
+        <Pattern Token="KEYWORD_INTRINSIC" RegEx="val|ucase|truncate|trim|tanh|tan|strreverse|strdup|strconv|strcomp|str|sqrt|split|space|sinh|sin|sign|round|right|replace|rtrim|rset|pow|oct|min|mid|max|log10|log|len|left|ltrim|lset|lcase|join|instrrev|instr|hex|formatpercent|formatnumber|formatdatetime|formatcurrency|format|floor|filter|exp|cosh|cos|chrw|chr|ceiling|cushort|culng|cuint|ctype|cstr|csng|cshort|csbyte|cobj|clng|cint|cdec|cdbl|cdate|cchar|cbyte|cbool|atan2|atan|asin|ascw|asc|acos|abs" Color="#ff8000ff"/>
+        <Pattern Token="BRACE" RegEx="\(|\)" Color="#ff800000"/>
+      </Patterns>
+    </Configuration>    
+  </Highlighter>
+</Highlighters>
