@@ -1,4 +1,7 @@
-# Welcome to CodeXCavator2, a code indexing and search tool.
+# Welcome to CodeXCavator2
+## A code indexing and search tool
+
+CodeXCavator allows you to search your source code! It is very fast and can handle massive code sets where the index exceeds 2GB which often causes tools like ctag and global to crash.
 
 To use it, simply download the Deploy directory and run the CodeXCavator.exe in there. No installation or registration or adminitrator rights is required.
 
