@@ -1,9 +1,14 @@
-#Welcome to CodeXCavator2, a code indexing and search tool.
+# Welcome to CodeXCavator2, a code indexing and search tool.
 
 To use it, simply download the Deploy directory and run the CodeXCavator.exe in there. No installation or registration or adminitrator rights is required.
 
+You can download the Portable Apps version [here](https://github.com/Ben136KBC/CodeXCavator2/blob/master/PortableAppsFiles/CodeXCavator2Portable_0.10_English.paf.exe)
+
+You can also simply download the Deploy folder (https://github.com/Ben136KBC/CodeXCavator2/tree/master/Deploy) in Zipped format, unzip, and run CodeXCavator.exe
+
 CodeXCavator is essentially CodeXCavator (see https://sourceforge.net/p/codexcavator/wiki/Home/) but with a number of changes made by Ben van der Merwe. The changes are as follows:
 
+- Search text input is selected by default on startup.
 - Searching is case insensitive by default.
 - Application remembers its previous location and size when opened.
 - The main view has a button to update the current index.
