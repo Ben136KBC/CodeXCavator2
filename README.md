@@ -9,7 +9,7 @@ You can download the Portable Apps version [here](https://github.com/Ben136KBC/C
 
 You can also simply download the Deploy folder (https://github.com/Ben136KBC/CodeXCavator2/tree/master/Deploy) in Zipped format, unzip, and run CodeXCavator.exe
 
-CodeXCavator is essentially CodeXCavator (see https://sourceforge.net/p/codexcavator/wiki/Home/) but with a number of changes made by Ben van der Merwe. The changes are as follows:
+CodeXCavator is essentially a derivative of CodeXCavator (see https://sourceforge.net/p/codexcavator/wiki/Home/) but with a number of changes made by Ben van der Merwe. The changes are as follows:
 
 - Search text input is selected by default on startup.
 - Searching is case insensitive by default.
@@ -24,8 +24,8 @@ CodeXCavator is essentially CodeXCavator (see https://sourceforge.net/p/codexcav
 The changes were not made to the original CodeXCavator, because it suits the needs of the original author as is, and he is concerned about changes possibly breaking something. As required by the license agreement, modified files in this archive are clearly marked. This version is released under the same license agreement as the original.
 
 Things I intend to work on:
-- Find the definition of something in the code.
 - Add to PortableApps
+- Find the definition of something in the code.
 - Sorting amongst results
 
 Last updated: 15 February 2019 by Ben van der Merwe.
