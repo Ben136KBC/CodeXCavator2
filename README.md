@@ -3,11 +3,12 @@
 
 CodeXCavator allows you to search your source code! It is very fast and can handle massive code sets where the index exceeds 2GB which is more than ctag and global can handle.
 
-To use it, simply download the Deploy directory and run the CodeXCavator.exe in there. No installation or registration or adminitrator rights is required. The application requires .NET 4.0.
+To use the application, you have three options:
+- Download https://github.com/Ben136KBC/CodeXCavator2/blob/master/Deploy.zip, unzip and run CodeXCavator.exe
+- Download the Deploy directory and run the CodeXCavator.exe in there.
+- You can download the Portable Apps version [here](https://github.com/Ben136KBC/CodeXCavator2/blob/master/PortableAppsFiles/CodeXCavator2Portable_0.10_English.paf.exe)
 
-You can download the Portable Apps version [here](https://github.com/Ben136KBC/CodeXCavator2/blob/master/PortableAppsFiles/CodeXCavator2Portable_0.10_English.paf.exe)
-
-You can also simply download the Deploy folder (https://github.com/Ben136KBC/CodeXCavator2/tree/master/Deploy) in Zipped format, unzip, and run CodeXCavator.exe
+No installation or registration or adminitrator rights is required. The application requires .NET 4.0.
 
 CodeXCavator is essentially a derivative of CodeXCavator (see https://sourceforge.net/p/codexcavator/wiki/Home/) but with a number of changes made by Ben van der Merwe. The changes are as follows:
 
