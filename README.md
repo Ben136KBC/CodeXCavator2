@@ -25,7 +25,7 @@ CodeXCavator is essentially a derivative of CodeXCavator (see https://sourceforg
 The changes were not made to the original CodeXCavator, because it suits the needs of the original author as is, and he is concerned about changes possibly breaking something. As required by the license agreement, modified files in this archive are clearly marked. This version is released under the same license agreement as the original.
 
 Things I intend to work on:
-- Add to PortableApps
+- Add to PortableApps. A version is available, but not through the official list of apps, as an app has to be compatible with .NET 2 or .NET 4, which is not really an option. See: https://portableapps.com/node/59992
 - Find the definition of something in the code.
 - Sorting amongst results
 
