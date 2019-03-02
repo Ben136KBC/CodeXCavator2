@@ -29,9 +29,9 @@
         <Label Content="Code Directories:" HorizontalAlignment="Left" Height="25" Margin="2,219,0,0" VerticalAlignment="Top" Width="101"/>
         <TextBox x:Name="FileSourceDirectories" ToolTip="Enter source code directories, one per line, or separated by a semi colon." HorizontalAlignment="Stretch" Height="115" Margin="1,219,0,0" TextWrapping="Wrap" AcceptsReturn="True" Text="" VerticalAlignment="Top" Grid.Column="1" Grid.ColumnSpan="3"/>
         <Button Content=".." ToolTip="Browse for soure code directories." HorizontalAlignment="Center" Height="25" Grid.Column="0" Margin="41,249,40,0" VerticalAlignment="Top" Width="22" Click="BrowseCodeDirs_Click" RenderTransformOrigin="1.409,0.72"/>
-        <CheckBox x:Name="FileSourceDirectoriesRecursive" ToolTip="Include subdirectories." Content="Recurive" HorizontalAlignment="Left" Height="22" Margin="14,289,0,0" VerticalAlignment="Top" Width="81" RenderTransformOrigin="0.519,1.364"/>
+        <CheckBox x:Name="FileSourceDirectoriesRecursive" ToolTip="Include subdirectories." Content="Recursive" HorizontalAlignment="Left" Height="22" Margin="14,289,0,0" VerticalAlignment="Top" Width="81" RenderTransformOrigin="0.519,1.364"/>
         <Label Content="Includes:" HorizontalAlignment="Left" Height="25" Margin="9,343,0,0" VerticalAlignment="Top" Width="84"/>
         <TextBox x:Name="FileSourceDirectoriesInclude" ToolTip="List of file includes." HorizontalAlignment="Stretch" Height="56" Margin="1,339,0,0" TextWrapping="Wrap" AcceptsReturn="True" Text="" VerticalAlignment="Top" Grid.Column="1" Grid.ColumnSpan="3"/>
-        <Button Content="Created Index File" ToolTip="Create the index file, build the index, and start searching it" HorizontalAlignment="Stretch" Height="31" Margin="2,400,0,0" VerticalAlignment="Top" Click="CreateIndexFile_Click" Grid.ColumnSpan="4"/>
+        <Button Content="Create Index File" ToolTip="Create the index file, build the index, and start searching it" HorizontalAlignment="Stretch" Height="31" Margin="2,400,0,0" VerticalAlignment="Top" Click="CreateIndexFile_Click" Grid.ColumnSpan="4"/>
     </Grid>
 </Window>

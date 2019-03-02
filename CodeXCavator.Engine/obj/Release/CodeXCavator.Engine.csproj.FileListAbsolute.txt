@@ -9,3 +9,14 @@ F:\codexcavator-code-r43-trunk-BenWork\CodeXCavator.Engine\obj\Release\CodeXCava
 F:\codexcavator-code-r43-trunk-BenWork\CodeXCavator.Engine\obj\Release\CodeXCavator.Engine.csproj.CopyComplete
 F:\codexcavator-code-r43-trunk-BenWork\CodeXCavator.Engine\obj\Release\CodeXCavator.Engine.dll
 F:\codexcavator-code-r43-trunk-BenWork\CodeXCavator.Engine\obj\Release\CodeXCavator.Engine.pdb
+F:\cygwin64\home\Ben\CodeXCavator2\CodeXCavator2\CodeXCavator.Engine\bin\Release\CodeXCavator.Engine.dll
+F:\cygwin64\home\Ben\CodeXCavator2\CodeXCavator2\CodeXCavator.Engine\bin\Release\CodeXCavator.Engine.pdb
+F:\cygwin64\home\Ben\CodeXCavator2\CodeXCavator2\CodeXCavator.Engine\bin\Release\Lucene.Net.Contrib.Highlighter.dll
+F:\cygwin64\home\Ben\CodeXCavator2\CodeXCavator2\CodeXCavator.Engine\bin\Release\Lucene.Net.Contrib.Memory.dll
+F:\cygwin64\home\Ben\CodeXCavator2\CodeXCavator2\CodeXCavator.Engine\bin\Release\Lucene.Net.dll
+F:\cygwin64\home\Ben\CodeXCavator2\CodeXCavator2\CodeXCavator.Engine\obj\Release\CodeXCavator.Engine.csprojAssemblyReference.cache
+F:\cygwin64\home\Ben\CodeXCavator2\CodeXCavator2\CodeXCavator.Engine\obj\Release\CodeXCavator.Engine.g.resources
+F:\cygwin64\home\Ben\CodeXCavator2\CodeXCavator2\CodeXCavator.Engine\obj\Release\CodeXCavator.Engine.csproj.CoreCompileInputs.cache
+F:\cygwin64\home\Ben\CodeXCavator2\CodeXCavator2\CodeXCavator.Engine\obj\Release\CodeXCavator.Engine.csproj.CopyComplete
+F:\cygwin64\home\Ben\CodeXCavator2\CodeXCavator2\CodeXCavator.Engine\obj\Release\CodeXCavator.Engine.dll
+F:\cygwin64\home\Ben\CodeXCavator2\CodeXCavator2\CodeXCavator.Engine\obj\Release\CodeXCavator.Engine.pdb
