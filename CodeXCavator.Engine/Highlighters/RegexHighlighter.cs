@@ -130,7 +130,7 @@ namespace CodeXCavator.Engine.Highlighters
         /// </summary>
         public RegexHighlighter()
         {
-            mCaseSensitive = true;
+            mCaseSensitive = false;
             mPatterns = new RegexHighlighterPattern[] { };
             Initialize();
         }
@@ -141,7 +141,7 @@ namespace CodeXCavator.Engine.Highlighters
         /// <param name="patterns">List of RegExHighlighterPattern instances.</param>
         public RegexHighlighter( params RegexHighlighterPattern[] patterns )
         {
-            mCaseSensitive = true;
+            mCaseSensitive = false;
             mPatterns = patterns ?? new RegexHighlighterPattern[] {};
             Initialize();
         }
@@ -167,7 +167,7 @@ namespace CodeXCavator.Engine.Highlighters
             if( configuration == null )
             {
                 mPatterns = null;
-                mCaseSensitive = true;
+                mCaseSensitive = false;
                 Initialize();
             }
             else

@@ -34,7 +34,7 @@ namespace CodeXCavator.Engine.Searchers
         /// </summary>
         public LiteralTextSearcher()
         {
-            mCaseSensitive = true;
+            mCaseSensitive = false;
             mWordWise = false;
         }
 

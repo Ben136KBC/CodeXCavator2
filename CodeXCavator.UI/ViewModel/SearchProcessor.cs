@@ -196,6 +196,7 @@ namespace CodeXCavator.UI.ViewModel
                     {
                         DetachFromSearchBackgroundWorkers();
                         OnPropertyChanged( "SearchQuery" );
+                        OnPropertyChanged( "HasSearchQuery" );
                         SearchResults = null;
                         SearchResultCount = null;
                         SearchResultsQuery = null;
@@ -226,8 +227,14 @@ namespace CodeXCavator.UI.ViewModel
                         mRequery = true;
                     }
                     OnPropertyChanged( "SearchQuery" );
+                    OnPropertyChanged( "HasSearchQuery" );
                 }
             }
+        }
+
+        public bool HasSearchQuery
+        {
+            get { return !string.IsNullOrEmpty(mSearchQuery); }
         }
 
         /// <summary>
@@ -707,8 +714,43 @@ namespace CodeXCavator.UI.ViewModel
             {
                 mSearchQuery = searchQuery;
                 OnPropertyChanged( "SearchQuery" );
+                OnPropertyChanged( "HasSearchQuery" );
             }
             StartSearch( mSearchType, mSearchQuery, mUseFileTypeFilter ? FileTypeFilter.AllowedFileTypes : null, mUseDirectoryFilter ? DirectoryFilter.AllowedDirectories : null );
+        }
+
+        private ICommand mClearSearchQueryCommand;
+
+        /// <summary>
+        /// Clear search query command.
+        /// </summary>
+        public ICommand ClearSearchQueryCommand
+        {
+            get
+            {
+                if( mClearSearchQueryCommand == null )
+                    mClearSearchQueryCommand = new Command( CanClearSearchQuery, ClearSearchQuery );
+                return mClearSearchQueryCommand;
+            }
+        }
+
+        /// <summary>
+        /// Determines, whether the search query can be cleared.
+        /// </summary>
+        /// <param name="arg">Command parameter.</param>
+        /// <returns>True, if a search query is set, false otherwise.</returns>
+        private bool CanClearSearchQuery(object arg)
+        {
+            return HasSearchQuery;
+        }
+
+        /// <summary>
+        /// Clears the search query.
+        /// </summary>
+        /// <param name="arg">Command parameter.</param>
+        private void ClearSearchQuery(object arg)
+        {
+            SearchQuery = null;
         }
     }
 

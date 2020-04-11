@@ -247,10 +247,14 @@ namespace CodeXCavator.Engine
         /// <returns>Absolute path of the file or directory.</returns>
         private static string GetAbsolutePath( string path )
         {
-            if( !Path.IsPathRooted( path ) )
-                path = Path.GetFullPath( path );
-            Uri uri = new Uri( path, UriKind.RelativeOrAbsolute );
-            return uri.AbsolutePath.Replace( "/", "\\" );
+            try
+            {
+                return Path.GetFullPath( path );
+            }
+            catch
+            {
+                return path;
+            }
         }
    }
 }

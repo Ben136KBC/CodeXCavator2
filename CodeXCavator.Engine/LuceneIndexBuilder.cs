@@ -20,6 +20,7 @@ using CodeXCavator.Engine.Interfaces;
 using Lucene.Net.Index;
 using Lucene.Net.Store;
 using Lucene.Net.Analysis;
+using System.IO;
 
 namespace CodeXCavator.Engine
 {
@@ -33,10 +34,11 @@ namespace CodeXCavator.Engine
     /// <seealso cref="IIndexBuilder"/>
     internal class LuceneIndexBuilder : IIndexBuilder, IProgressProvider
     {
-        Directory mIndex;
+        Lucene.Net.Store.Directory mIndex;
         IndexWriter mIndexWriter;
         Analyzer mDefaultAnalyzer;
         Analyzer mDefaultFilePathAnalyzer;
+        Analyzer mDefaultFileExtensionAnalyzer;
         Analyzer mDefaultContentsAnalyzer;
         Analyzer mDefaultCaseInsensitiveContentsAnalyzer;
         CodeXCavator.Engine.Tokenizers.TagTokenizer mDefaultTagsTokenizer;
@@ -44,6 +46,7 @@ namespace CodeXCavator.Engine
         Analyzer mDefaultCaseInsensitiveTagsAnalyzer;
 
         internal const string FIELD_PATH = "Path";
+        internal const string FIELD_EXTENSION = "Extension";
         internal const string FIELD_LAST_MODIFIED = "Modified";
         internal const string FIELD_SIZE = "Size";
         internal const string FIELD_CONTENTS = "Contents";
@@ -55,7 +58,8 @@ namespace CodeXCavator.Engine
         internal const string FIELD_CAPTION = "Caption";
 
         internal static readonly CodeXCavator.Engine.Tokenizers.TagTokenizer DEFAULT_TAGS_TOKENIZER = new CodeXCavator.Engine.Tokenizers.TagTokenizer(); 
-        internal static readonly Analyzer DEFAULT_FILEPATH_ANALYZER = ( new CodeXCavator.Engine.Tokenizers.WhitespaceSeparatorTokenizer( ':', '/', '\\', '.' ) ).ToAnalyzer( Case.Insensitive);
+        internal static readonly Analyzer DEFAULT_FILEPATH_ANALYZER = ( new CodeXCavator.Engine.Tokenizers.WhitespaceSeparatorTokenizer( ':', '/', '\\', '.' ) ).ToAnalyzer( Case.Insensitive );
+        internal static readonly Analyzer DEFAULT_FILE_EXTENSION_ANALYZER = ( new CodeXCavator.Engine.Tokenizers.WhitespaceSeparatorTokenizer() ).ToAnalyzer( Case.Insensitive );
         internal static readonly Analyzer DEFAULT_CONTENTS_ANALYZER = ( new CodeXCavator.Engine.Tokenizers.WhitespaceSeparatorTokenizer( TextUtilities.DEFAULT_SEPARATORS ) ).ToAnalyzer();
         internal static readonly Analyzer DEFAULT_TAGS_ANALYZER = ( DEFAULT_TAGS_TOKENIZER ).ToAnalyzer();
         internal static readonly Analyzer DEFAULT_CASE_INSENSITIVE_CONTENTS_ANALYZER = ( new CodeXCavator.Engine.Tokenizers.WhitespaceSeparatorTokenizer( TextUtilities.DEFAULT_SEPARATORS ) ).ToAnalyzer( Case.Insensitive );
@@ -66,24 +70,15 @@ namespace CodeXCavator.Engine
         /// </summary>
         /// <param name="index">Index directory.</param>
         /// <param name="overwrite">Specifies, whether the index should be overwritten, or not.</param>
-        public LuceneIndexBuilder( Directory index, bool overwrite = false )
+        public LuceneIndexBuilder( Lucene.Net.Store.Directory index, bool overwrite = false )
         {
             IndexPath = index.ToString();
             mIndex = index;
-            
-            mDefaultFilePathAnalyzer = DEFAULT_FILEPATH_ANALYZER;
-            mDefaultContentsAnalyzer = DEFAULT_CONTENTS_ANALYZER;
-            mDefaultTagsTokenizer = DEFAULT_TAGS_TOKENIZER;
-            mDefaultTagsAnalyzer = DEFAULT_TAGS_ANALYZER;
-            mDefaultCaseInsensitiveContentsAnalyzer = DEFAULT_CASE_INSENSITIVE_CONTENTS_ANALYZER;
-            mDefaultCaseInsensitiveTagsAnalyzer = DEFAULT_CASE_INSENSITIVE_TAGS_ANALYZER;
-            
-            mDefaultAnalyzer = ConstructDefaultAnalyzer();
-            
-            mIndexWriter = new IndexWriter( mIndex, mDefaultAnalyzer, overwrite, IndexWriter.MaxFieldLength.UNLIMITED );
+
+            InitializeDefaultAnalyzers();
+
+            mIndexWriter = new IndexWriter(mIndex, mDefaultAnalyzer, overwrite, IndexWriter.MaxFieldLength.UNLIMITED);
         }
-
-
 
         /// <summary>
         /// Initialization constructor.
@@ -96,17 +91,27 @@ namespace CodeXCavator.Engine
             var indexDirectoryInfo = new System.IO.DirectoryInfo( indexFilePath );
             if( !indexDirectoryInfo.Exists )
                 indexDirectoryInfo.Create();
+
+            InitializeDefaultAnalyzers();
+            
+            mIndex = new SimpleFSDirectory( indexDirectoryInfo, new NativeFSLockFactory() );
+            mIndexWriter = new IndexWriter( mIndex, mDefaultAnalyzer, overwrite, IndexWriter.MaxFieldLength.UNLIMITED );
+        }
+
+        /// <summary>
+        /// Initializes default analyzers for the different index fields
+        /// </summary>
+        private void InitializeDefaultAnalyzers()
+        {
             mDefaultFilePathAnalyzer = DEFAULT_FILEPATH_ANALYZER;
+            mDefaultFileExtensionAnalyzer = DEFAULT_FILE_EXTENSION_ANALYZER;
             mDefaultContentsAnalyzer = DEFAULT_CONTENTS_ANALYZER;
             mDefaultTagsTokenizer = DEFAULT_TAGS_TOKENIZER;
             mDefaultTagsAnalyzer = DEFAULT_TAGS_ANALYZER;
             mDefaultCaseInsensitiveContentsAnalyzer = DEFAULT_CASE_INSENSITIVE_CONTENTS_ANALYZER;
             mDefaultCaseInsensitiveTagsAnalyzer = DEFAULT_CASE_INSENSITIVE_TAGS_ANALYZER;
-            
+
             mDefaultAnalyzer = ConstructDefaultAnalyzer();
-            
-            mIndex = new SimpleFSDirectory( indexDirectoryInfo, new NativeFSLockFactory() );
-            mIndexWriter = new IndexWriter( mIndex, mDefaultAnalyzer, overwrite, IndexWriter.MaxFieldLength.UNLIMITED );
         }
 
         /// <summary>
@@ -118,6 +123,7 @@ namespace CodeXCavator.Engine
             return ConstructDefaultAnalyzer
             ( 
                 mDefaultFilePathAnalyzer, 
+                mDefaultFileExtensionAnalyzer,
                 mDefaultContentsAnalyzer, 
                 mDefaultCaseInsensitiveContentsAnalyzer, 
                 mDefaultTagsAnalyzer, 
@@ -138,7 +144,8 @@ namespace CodeXCavator.Engine
         {
             return ConstructDefaultAnalyzer
             ( 
-                mDefaultFilePathAnalyzer, 
+                mDefaultFilePathAnalyzer,
+                mDefaultFileExtensionAnalyzer,
                 contentsAnalyzer, 
                 caseInsensitiveContentsAnalyzer, 
                 mDefaultTagsAnalyzer, 
@@ -150,7 +157,8 @@ namespace CodeXCavator.Engine
         {
             return ConstructDefaultAnalyzer
             ( 
-                mDefaultFilePathAnalyzer, 
+                mDefaultFilePathAnalyzer,
+                mDefaultFileExtensionAnalyzer,
                 contentsTokenizer.ToAnalyzer(), 
                 contentsTokenizer.ToAnalyzer( Case.Insensitive ), 
                 tagsTokenizer.ToAnalyzer(), 
@@ -162,12 +170,13 @@ namespace CodeXCavator.Engine
         /// Constructs the default analyzer.
         /// </summary>
         /// <returns></returns>
-        private Analyzer ConstructDefaultAnalyzer( Analyzer filePathAnalyzer, Analyzer contentsAnalyzer, Analyzer caseInsensitiveContentsAnalyzer, Analyzer tagsAnalyzer, Analyzer caseInsensitiveTagsAnalyzer )
+        private Analyzer ConstructDefaultAnalyzer( Analyzer filePathAnalyzer, Analyzer fileExtensionAnalyzer, Analyzer contentsAnalyzer, Analyzer caseInsensitiveContentsAnalyzer, Analyzer tagsAnalyzer, Analyzer caseInsensitiveTagsAnalyzer )
         {
             return new PerFieldAnalyzerWrapper( mDefaultContentsAnalyzer,
                     new KeyValuePair<string, Analyzer>[] 
                         { 
                             new KeyValuePair<string, Analyzer>( FIELD_PATH, filePathAnalyzer ),
+                            new KeyValuePair<string, Analyzer>( FIELD_EXTENSION, fileExtensionAnalyzer ),
                             new KeyValuePair<string, Analyzer>( FIELD_CONTENTS, contentsAnalyzer ),
                             new KeyValuePair<string, Analyzer>( FIELD_TAGS, tagsAnalyzer ),
                             new KeyValuePair<string, Analyzer>( FIELD_CONTENTS + FIELD_CASEINSENSITIVE, caseInsensitiveContentsAnalyzer ),
@@ -190,6 +199,7 @@ namespace CodeXCavator.Engine
             caseInsensitiveTagsReader = new System.IO.StreamReader( caseInsensitiveTagStream, Encoding.Default, true );
 
             document.Add( new Lucene.Net.Documents.Field( FIELD_PATH, filePath, Lucene.Net.Documents.Field.Store.YES, Lucene.Net.Documents.Field.Index.ANALYZED_NO_NORMS ) );
+            document.Add( new Lucene.Net.Documents.Field( FIELD_EXTENSION, Path.GetExtension(filePath).ToLower(), Lucene.Net.Documents.Field.Store.YES, Lucene.Net.Documents.Field.Index.ANALYZED_NO_NORMS ) );
             document.Add( new Lucene.Net.Documents.NumericField( FIELD_LAST_MODIFIED ).SetLongValue( FileStorageProviders.GetLastModificationTimeStamp( filePath ) ) );
             document.Add( new Lucene.Net.Documents.NumericField( FIELD_SIZE ).SetLongValue( FileStorageProviders.GetSize( filePath ) ) );
             document.Add( new Lucene.Net.Documents.Field( FIELD_CONTENTS, contentsReader, Lucene.Net.Documents.Field.TermVector.WITH_POSITIONS_OFFSETS ) );
@@ -271,10 +281,10 @@ namespace CodeXCavator.Engine
 
                     contentsStream.Close();
                     tagsStream.Close();
-                    
+
                     // Add tag documents
-                    if( tagTokenList.Count > 0 )
-                        AddTagDocuments( filePath, tagTokenList );
+                    if (tagTokenList.Count > 0)
+                        AddTagDocuments(filePath, tagTokenList);
                 }
                 catch
                 {
@@ -306,7 +316,7 @@ namespace CodeXCavator.Engine
                         {
                             var document = new Lucene.Net.Documents.Document();
                             InitializeTagDocument( document, filePath, tagToken.Text, tagInfo );
-                            mIndexWriter.AddDocument( document );
+                            mIndexWriter.AddDocument( document );                            
                         }
                     }
                 }
@@ -376,7 +386,8 @@ namespace CodeXCavator.Engine
                     // Remove existing tag documents for the current file
                     mIndexWriter.DeleteDocuments( new Term( FIELD_TAG_SOURCE_PATH, filePath ) );
                     // Add new tag documents
-                    AddTagDocuments( filePath, tagTokenList );                    
+                    if (tagTokenList.Count > 0)
+                        AddTagDocuments(filePath, tagTokenList);
                 }
                 catch
                 {

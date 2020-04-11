@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -29,6 +30,7 @@ using CodeXCavator.Indexer.ViewModel;
 
 namespace CodeXCavator.Indexer
 {
+
     /// <summary>
     /// Interaktionslogik für MainWindow.xaml
     /// </summary>

@@ -37,18 +37,17 @@ namespace CodeXCavator.Engine
         /// fastest indexing and search performance.</returns>
         public static IIndex CreateMemoryIndex()
         {
-            return new LuceneIndex( new Lucene.Net.Store.RAMDirectory(), true );
+            return new LuceneIndex( new Lucene.Net.Store.RAMDirectory() );
         }
 
         /// <summary>
         /// Creates a file system based index.
         /// </summary>
         /// <param name="indexPath">Path to the root of the file based index.</param>
-        /// <param name="overwrite">Specifies, whether the index should be overwritten.</param>
         /// <returns>IIndex instance, which allows to update or recreate the specified index.</returns>
-        public static IIndex CreateFileSystemIndex( string indexPath, bool overwrite = false )
+        public static IIndex CreateFileSystemIndex( string indexPath )
         {
-            return new LuceneIndex( indexPath, overwrite );
+            return new LuceneIndex( indexPath );
         }
 
         /// <summary>

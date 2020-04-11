@@ -15,11 +15,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using CodeXCavator.Engine.Interfaces;
 using Lucene.Net.Store;
 using Lucene.Net.Analysis;
 using Lucene.Net.Index;
+using CodeXCavator.Engine.Extensions;
 
 namespace CodeXCavator.Engine
 {
@@ -31,18 +31,21 @@ namespace CodeXCavator.Engine
     /// implementation.
     /// </summary>
     /// <seealso cref="IIndex"/>
-    internal class LuceneIndex : IIndex
+    internal partial class LuceneIndex : IIndex
     {
         Directory mIndex;
         IndexReader mIndexReader;
+        HashSet<string> mIndexFields;
         Analyzer mDefaultAnalyzer;
         Analyzer mDefaultFilePathAnalyzer;
+        Analyzer mDefaultFileExtensionAnalyzer;
         Analyzer mDefaultContentsAnalyzer;
         Analyzer mDefaultTagsAnalyzer;
         Analyzer mDefaultCaseInsensitiveContentsAnalyzer;
         Analyzer mDefaultCaseInsensitiveTagsAnalyzer;
         
         internal const string FIELD_PATH = LuceneIndexBuilder.FIELD_PATH;
+        internal const string FIELD_EXTENSION = LuceneIndexBuilder.FIELD_EXTENSION;
         internal const string FIELD_LAST_MODIFIED = LuceneIndexBuilder.FIELD_LAST_MODIFIED;
         internal const string FIELD_SIZE = LuceneIndexBuilder.FIELD_SIZE;
         internal const string FIELD_CONTENTS = LuceneIndexBuilder.FIELD_CONTENTS;
@@ -54,6 +57,7 @@ namespace CodeXCavator.Engine
         internal const string FIELD_CASEINSENSITIVE = LuceneIndexBuilder.FIELD_CASEINSENSITIVE;
 
         internal static readonly Analyzer DEFAULT_FILEPATH_ANALYZER = LuceneIndexBuilder.DEFAULT_FILEPATH_ANALYZER;
+        internal static readonly Analyzer DEFAULT_FILE_EXTENSION_ANALYZER = LuceneIndexBuilder.DEFAULT_FILE_EXTENSION_ANALYZER;
         internal static readonly Analyzer DEFAULT_CONTENTS_ANALYZER = LuceneIndexBuilder.DEFAULT_CONTENTS_ANALYZER;
         internal static readonly Analyzer DEFAULT_TAGS_ANALYZER = LuceneIndexBuilder.DEFAULT_TAGS_ANALYZER;
         internal static readonly Analyzer DEFAULT_CASE_INSENSITIVE_CONTENTS_ANALYZER = LuceneIndexBuilder.DEFAULT_CASE_INSENSITIVE_CONTENTS_ANALYZER;
@@ -62,45 +66,41 @@ namespace CodeXCavator.Engine
         /// <summary>
         /// Initialization constructor.
         /// </summary>
-        /// <param name="index">Index directory.</param>
-        /// <param name="overwrite">Specifies, whether the index should be overwritten, or not.</param>
-        public LuceneIndex( Directory index, bool overwrite = false )
+        /// <param name="indexFilePath">Path to the index root.</param>
+        public LuceneIndex(string indexFilePath) : this( CreateDirectoryIndex(indexFilePath) )
         {
-            IndexPath = index.ToString();
-            mIndex = index;
-            mIndexReader = IndexReader.Open( mIndex, true );
-
-            mDefaultFilePathAnalyzer = DEFAULT_FILEPATH_ANALYZER;
-            mDefaultContentsAnalyzer = DEFAULT_CONTENTS_ANALYZER;
-            mDefaultTagsAnalyzer = DEFAULT_TAGS_ANALYZER;
-            mDefaultCaseInsensitiveContentsAnalyzer = DEFAULT_CASE_INSENSITIVE_CONTENTS_ANALYZER;
-            mDefaultCaseInsensitiveTagsAnalyzer = DEFAULT_CASE_INSENSITIVE_TAGS_ANALYZER;
-
-            mDefaultAnalyzer = ConstructDefaultAnalyzer();
         }
 
         /// <summary>
         /// Initialization constructor.
         /// </summary>
-        /// <param name="indexFilePath">Path to the index root.</param>
-        /// <param name="overwrite">Specifies, whether the index should be overwritte, or not.</param>
-        public LuceneIndex( string indexFilePath, bool overwrite = false )
+        /// <param name="index">Index directory.</param>
+        public LuceneIndex(Directory index)
         {
-            IndexPath = indexFilePath;
-            var indexDirectoryInfo = new System.IO.DirectoryInfo( indexFilePath );
-            if( !indexDirectoryInfo.Exists )
-                indexDirectoryInfo.Create();
+            IndexPath = ((index as FSDirectory)?.Directory.FullName) ?? index.ToString();
 
+            InitializeDefaultAnalyzers();
+            OpenIndex(index);
+        }
+
+        private void OpenIndex(Directory index)
+        {
+            mIndex = index;
+            mIndexReader = IndexReader.Open(mIndex, true);
+            mIndexFields = new HashSet<string>();
+            mIndexFields.UnionWith(mIndexReader.GetFieldNames(IndexReader.FieldOption.ALL));
+        }
+
+        private void InitializeDefaultAnalyzers()
+        {
             mDefaultFilePathAnalyzer = DEFAULT_FILEPATH_ANALYZER;
+            mDefaultFileExtensionAnalyzer = DEFAULT_FILE_EXTENSION_ANALYZER;
             mDefaultContentsAnalyzer = DEFAULT_CONTENTS_ANALYZER;
             mDefaultTagsAnalyzer = DEFAULT_TAGS_ANALYZER;
             mDefaultCaseInsensitiveContentsAnalyzer = DEFAULT_CASE_INSENSITIVE_CONTENTS_ANALYZER;
             mDefaultCaseInsensitiveTagsAnalyzer = DEFAULT_CASE_INSENSITIVE_TAGS_ANALYZER;
 
             mDefaultAnalyzer = ConstructDefaultAnalyzer();
-
-            mIndex = new SimpleFSDirectory( indexDirectoryInfo, new NativeFSLockFactory() );
-            mIndexReader = IndexReader.Open( mIndex, true );
         }
 
         /// <summary>
@@ -113,6 +113,7 @@ namespace CodeXCavator.Engine
                     new KeyValuePair<string, Analyzer>[] 
                         { 
                             new KeyValuePair<string, Analyzer>( FIELD_PATH, mDefaultFilePathAnalyzer ),
+                            new KeyValuePair<string, Analyzer>( FIELD_EXTENSION, mDefaultFileExtensionAnalyzer ),
                             new KeyValuePair<string, Analyzer>( FIELD_CONTENTS, mDefaultContentsAnalyzer ),
                             new KeyValuePair<string, Analyzer>( FIELD_TAGS, mDefaultTagsAnalyzer ),
                             new KeyValuePair<string, Analyzer>( FIELD_CONTENTS + FIELD_CASEINSENSITIVE, mDefaultCaseInsensitiveContentsAnalyzer ),
@@ -121,38 +122,40 @@ namespace CodeXCavator.Engine
                     );
         }
 
+        private static SimpleFSDirectory CreateDirectoryIndex(string indexFilePath)
+        {
+            var indexDirectoryInfo = new System.IO.DirectoryInfo(indexFilePath);
+            if (!indexDirectoryInfo.Exists)
+                indexDirectoryInfo.Create();
+            var index = new SimpleFSDirectory(indexDirectoryInfo, new NativeFSLockFactory());
+            return index;
+        }
+
+        private FileList mFiles;
+
+        /// <summary>
+        /// Returns all files contained in the index
+        /// </summary>
         public IEnumerable<string> Files
         {
             get 
             {
-                var pathSelector = new Lucene.Net.Documents.MapFieldSelector( FIELD_PATH );
-                int numDocs = mIndexReader.NumDocs();
-                for( int i = 0 ; i < numDocs ; ++i )
-                {
-                    if( !mIndexReader.IsDeleted( i ) )
-                    {
-                        var document = mIndexReader.Document( i, pathSelector );
-                        var pathField = document.GetField( FIELD_PATH );
-                        if( pathField != null )
-                            yield return pathField.StringValue;
-                    }
-                }
+                return mFiles ?? (mFiles = new FileList(this) );
             }
         }
 
+        /// <summary>
+        /// Returns all tags contained in the index
+        /// </summary>
         public IEnumerable<TagInfo> Tags
         {
             get
             {
                 var tags = mIndexReader.Terms( new Term( FIELD_TAGS ) );
-                if( tags != null )
+                foreach( var tagTerm in tags.ToEnumerable( FIELD_TAGS ) )
                 {
-                    do
-                    {
-                        if( tags.Term != null && string.Equals( tags.Term.Field, FIELD_TAGS ) )
-                            yield return new TagInfo { Tag = tags.Term.Text, TotalCount = ComputeTotalTagCount( tags.Term.Text ), DocumentCount = mIndexReader.DocFreq( new Term( FIELD_TAGS, tags.Term.Text ) ), Links = GetTagLinks( tags.Term.Text ).Distinct() };
-                    }
-                    while( tags.Next() );
+                    if( tags.Term != null && string.Equals( tags.Term.Field, FIELD_TAGS ) )
+                        yield return new TagInfo { Tag = tags.Term.Text, TotalCount = ComputeTotalTagCount( tags.Term.Text ), DocumentCount = mIndexReader.DocFreq( new Term( FIELD_TAGS, tags.Term.Text ) ), Links = GetTagLinks( tags.Term.Text ).Distinct() };
                 }
             }
         }
@@ -218,9 +221,25 @@ namespace CodeXCavator.Engine
             yield break;
         }
 
+        private List<string> mFileTypes = null;
+
         public IEnumerable<string> FileTypes
         {
-            get { return Files.Select( file => System.IO.Path.GetExtension( file ) ).Distinct( StringComparer.OrdinalIgnoreCase ); }
+            get
+            {
+                if (mFileTypes != null)
+                    return mFileTypes;
+
+                if (HasField(FIELD_EXTENSION))
+                    return (mFileTypes = mIndexReader.Terms(new Term(FIELD_EXTENSION)).ToEnumerable(FIELD_EXTENSION).Select(fileTypeTerm => fileTypeTerm.Text).Distinct(StringComparer.OrdinalIgnoreCase).ToList());
+                else
+                    return (mFileTypes = Files.Select(file => System.IO.Path.GetExtension(file)).Distinct(StringComparer.OrdinalIgnoreCase).ToList());
+            }
+        }
+
+        private bool HasField(string field)
+        {
+            return mIndexFields?.Contains(field) == true;
         }
 
         public IIndexSearcher CreateSearcher()
@@ -260,4 +279,6 @@ namespace CodeXCavator.Engine
             }
         }
     }
+
+
 }

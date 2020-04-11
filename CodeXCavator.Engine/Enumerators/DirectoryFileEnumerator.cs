@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using CodeXCavator.Engine.Interfaces;
@@ -85,11 +86,31 @@ namespace CodeXCavator.Engine.Enumerators
             IEnumerable<string> files = null;
             files = System.IO.Directory.EnumerateFiles( Environment.ExpandEnvironmentVariables(fileCataloguePath), "*", System.IO.SearchOption.AllDirectories );
             if( files != null )
-                foreach( var filename in files )
+            {
+                var fileEnumerator = files.GetEnumerator();
+                while(true)
                 {
-                    var absoluteFileName = System.IO.Path.GetFullPath(filename);
-                    yield return absoluteFileName;
+                    string absoluteFileName = null;
+                    try
+                    {
+                        bool hasFile = fileEnumerator.MoveNext();
+                        if( !hasFile )
+                            break;
+                        var fileName = fileEnumerator.Current;
+                        absoluteFileName = System.IO.Path.GetFullPath(fileName);
+                    }
+                    catch( PathTooLongException )
+                    {
+                        absoluteFileName = null;
+                    }
+                    catch
+                    {
+                        break;
+                    }
+                    if( absoluteFileName != null )
+                        yield return absoluteFileName;
                 }
+            }
         }
 
         /// <summary>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,8 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CodeXCavator.Engine</RootNamespace>
     <AssemblyName>CodeXCavator.Engine</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,24 +31,27 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x86\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Lucene.Net, Version=3.0.3.0, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
@@ -79,6 +84,7 @@
     <Compile Include="Enumerators\CompoundFileEnumerator.cs" />
     <Compile Include="Enumerators\DirectoryFileEnumerator.cs" />
     <Compile Include="Enumerators\FixedFileEnumerator.cs" />
+    <Compile Include="LuceneExtensions.cs" />
     <Compile Include="FileActions.cs" />
     <Compile Include="FileCatalogueEnumerators.cs" />
     <Compile Include="FileEnumerators.cs" />
@@ -98,6 +104,7 @@
     <Compile Include="IndexFactory.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="LuceneIndex.cs" />
+    <Compile Include="LuceneIndex.FileList.cs" />
     <Compile Include="LuceneIndexBuilder.cs" />
     <Compile Include="LuceneIndexSearcher.cs" />
     <Compile Include="PluginManager.cs" />
@@ -133,10 +140,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy $(TargetPath) $(SolutionDir)\Deploy /Y
-copy $(SolutionDir)\LICENSE.txt $(SolutionDir)\Deploy /Y
+    <PostBuildEvent>if not exist "$(SolutionDir)Deploy" md "$(SolutionDir)Deploy"
+copy "$(TargetPath)" "$(SolutionDir)Deploy" /Y
+copy "$(SolutionDir)LICENSE.txt" "$(SolutionDir)Deploy" /Y
 if %25errorlevel%25 NEQ 0 goto failed
-robocopy /S /MIR $(SolutionDir)\Externals $(SolutionDir)\Deploy\Externals /xd .svn /njs /njh
+robocopy /S /MIR "$(SolutionDir)Externals" "$(SolutionDir)Deploy\Externals" /xd .svn /njs /njh
 set errorlevel=0
 :failed</PostBuildEvent>
   </PropertyGroup>

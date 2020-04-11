@@ -20,16 +20,13 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using CodeXCavator.Engine.Interfaces;
 using System.Windows.Controls.Primitives;
 using CodeXCavator.UI.ViewModel;
+using System.Windows.Data;
+using System.ComponentModel;
 
 namespace CodeXCavator.UI
 {
@@ -998,5 +995,22 @@ namespace CodeXCavator.UI
             inFileSearch.TextSearcherTypes = Engine.TextSearchers.RegisteredTextSearcherTypes;
         }
 
+        private void chkSortFilesAlphabetically_Checked(object sender, RoutedEventArgs e)
+        {
+            var fileListCollectionViewSource = FindResource("cvsFiles") as CollectionViewSource;
+            if( fileListCollectionViewSource != null )
+            {
+                fileListCollectionViewSource.SortDescriptions.Add( new SortDescription(null, ListSortDirection.Ascending) );
+            }
+        }
+
+        private void chkSortFilesAlphabetically_Unchecked(object sender, RoutedEventArgs e)
+        {
+            var fileListCollectionViewSource = FindResource("cvsFiles") as CollectionViewSource;
+            if( fileListCollectionViewSource != null )
+            {
+                fileListCollectionViewSource.SortDescriptions.Clear();
+            }
+        }
     }
 }

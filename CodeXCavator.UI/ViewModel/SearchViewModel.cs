@@ -232,6 +232,7 @@ namespace CodeXCavator.UI.ViewModel
         private bool mEnableAllFileTypes;
 
         private bool mIsFilterByFileListEnabled;
+        private bool mIsAlphabeticalFileSortingEnabled;
         private FileViewModel mSelectedFile;
 
         private SearchProcessor mContentsSearchProcessor = new SearchProcessor( SearchType.Contents, true, true, true );
@@ -417,6 +418,7 @@ namespace CodeXCavator.UI.ViewModel
                 {
                     mCurrentIndex = value;
                     mCurrentSearcher = value != null ? value.Index.CreateSearcher() : null;
+                    mFiles = null;
 
                     var searchQuery = mContentsSearchProcessor.SearchQuery;
                     InitializeSearchProcessors( mUserSettings );
@@ -491,6 +493,9 @@ namespace CodeXCavator.UI.ViewModel
                 }
             }
         }
+
+        private ModelToViewModelMappingReadOnlyList<string, FileViewModel> mFiles;
+
         /// <summary>
         /// Returns the list of files contained in the current index, or the file search result list
         /// </summary>
@@ -500,8 +505,25 @@ namespace CodeXCavator.UI.ViewModel
             {
                 if( mFileSearchProcessor.SearchResults != null )
                     return mFileSearchProcessor.SearchResults.Cast<ViewModel.SearchHitViewModel>().Select( filePath => new ViewModel.FileViewModel( filePath.FilePath, FileViewModel.GetFormattedFilePath( filePath ) ) );
-                return CurrentIndex != null ? CurrentIndex.Files.Select( filePath => new ViewModel.FileViewModel( filePath ) ) : null;
+
+                if( CurrentIndex == null )
+                    return null;
+
+                if( mFiles != null )
+                    return mFiles;
+                
+                var files = CurrentIndex.Files;
+                var fileReadOnlyList = files as IReadOnlyList<string>;
+                if( fileReadOnlyList != null )
+                    mFiles = new ModelToViewModelMappingReadOnlyList<string, FileViewModel>( fileReadOnlyList, GetFileViewModel );
+
+                return mFiles ?? files.Select( GetFileViewModel );
             }
+        }
+
+        private static FileViewModel GetFileViewModel( string filePath )
+        {
+            return new ViewModel.FileViewModel( filePath );
         }
 
         /// <summary>

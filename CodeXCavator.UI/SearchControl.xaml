@@ -20,6 +20,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:l="clr-namespace:CodeXCavator.UI"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="800" 
              xmlns:local="clr-namespace:CodeXCavator.UI"
@@ -241,6 +242,71 @@
             </Style.Setters>
         </Style>
 
+        <!-- Sort check box style -->
+        <Style x:Key="stlSortCheckBox" TargetType="CheckBox">
+            <Style.Setters>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="CheckBox">
+                            <Grid x:Name="grdButton">
+                                <Image x:Name="imgButton" DockPanel.Dock="Right" Source="/CodeXCavator.UI;component/Images/sort_alphabet.png" UseLayoutRounding="True" Stretch="None" Margin="2,0,0,0" RenderTransformOrigin="0.5,0.5">
+                                    <Image.Effect>
+                                        <DropShadowEffect x:Name="imgButtonOutline" ShadowDepth="0" Color="Lime" Opacity="0" BlurRadius="4" />
+                                    </Image.Effect>
+                                    <Image.RenderTransform>
+                                        <ScaleTransform x:Name="trfmButton"/>
+                                    </Image.RenderTransform>
+                                </Image>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CheckStates">
+                                        <VisualState x:Name="Checked">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="imgButtonOutline" Storyboard.TargetProperty="Opacity" To="1.0" Duration="00:00:00"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Unchecked">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="imgButtonOutline" Storyboard.TargetProperty="Opacity" To="0.0" Duration="00:00:00"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleX" To="1.0" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleY" To="1.0" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="grdButton" Storyboard.TargetProperty="Opacity" To="0.8" Duration="00:00:00" />
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="MouseOver">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleX" To="1.0" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleY" To="1.0" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="grdButton" Storyboard.TargetProperty="Opacity" To="1.0" Duration="00:00:00" />
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <Storyboard>
+                                                <PointAnimation  Storyboard.TargetName="imgButton" Storyboard.TargetProperty="RenderTransformOrigin" To="0.65,0.65" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleX" To="0.85" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="trfmButton" Storyboard.TargetProperty="ScaleY" To="0.85" Duration="00:00:00" />
+                                                <DoubleAnimation Storyboard.TargetName="grdButton" Storyboard.TargetProperty="Opacity" To="1.0" Duration="00:00:00" />
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Disabled">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="grdButton" Storyboard.TargetProperty="Opacity" To="0.5" Duration="00:00:00" />
+                                            </Storyboard>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style.Setters>
+        </Style>
+
         <!-- Validation control template for search terms -->
         <ControlTemplate x:Key="ctpValidation">
             <Grid>
@@ -251,12 +317,10 @@
             </Grid>
         </ControlTemplate>
         
-        <!-- Collection view source for file list -->        
+        <!-- Collection view source for file list -->
         <CollectionViewSource Source="{Binding CurrentSearch.Files}" x:Key="cvsFiles">
-            <CollectionViewSource.SortDescriptions>
-                <my:SortDescription Direction="Ascending"/>
-            </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
+        
         <!-- Collection view source for file types -->
         <CollectionViewSource Source="{Binding CurrentSearch.FileTypes}" x:Key="cvsFileTypes">
             <CollectionViewSource.SortDescriptions>
@@ -473,7 +537,12 @@
                                     <Separator Margin="5,0,5,0" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
                                     <local:OptionsControl OptionsProvider="{Binding CurrentSearch.CurrentSearchProcessor.SearchOptions}" Margin="0,0,0,0"></local:OptionsControl>
                                 </StackPanel>
-                                <TextBox x:Name="SearchQueryTextBox" DockPanel.Dock="Left" Text="{Binding CurrentSearch.CurrentSearchProcessor.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Validation.ErrorTemplate="{StaticResource ctpValidation}" ToolTip="{StaticResource ttpSearchQuery}" Tag="{Binding CurrentSearch.CurrentSearchProcessor}" PreviewKeyDown="searchTextBox_PreviewKeyDown" />
+                                <Grid DockPanel.Dock="Left">
+                                    <TextBox x:Name="SearchQueryTextBox" DockPanel.Dock="Left" Text="{Binding CurrentSearch.CurrentSearchProcessor.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Validation.ErrorTemplate="{StaticResource ctpValidation}" ToolTip="{StaticResource ttpSearchQuery}" Tag="{Binding CurrentSearch.CurrentSearchProcessor}" PreviewKeyDown="searchTextBox_PreviewKeyDown"/>
+                                    <Button ToolTip="Click to clear search text." Focusable="False" MaxWidth="18" HorizontalAlignment="Right" Margin="2" Visibility="{Binding CurrentSearch.CurrentSearchProcessor.HasSearchQuery, Converter={StaticResource cvtBooleanToVisibility}}" Command="{Binding CurrentSearch.CurrentSearchProcessor.ClearSearchQueryCommand}">
+                                        <Image UseLayoutRounding="True" SnapsToDevicePixels="True" Source="/CodeXCavator.UI;component/Images/cross.png" Width="12" Height="12"/>
+                                    </Button>
+                                </Grid>
                             </DockPanel>
                         </StackPanel>
                     </TabItem>
@@ -492,7 +561,12 @@
                                     <Separator Margin="5,0,5,0" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
                                     <local:OptionsControl OptionsProvider="{Binding CurrentSearch.CurrentSearchProcessor.SearchOptions}" Margin="0,0,0,0"></local:OptionsControl>
                                 </StackPanel>
-                                <TextBox Text="{Binding CurrentSearch.CurrentSearchProcessor.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Validation.ErrorTemplate="{StaticResource ctpValidation}" ToolTip="{StaticResource ttpSearchQuery}" Tag="{Binding CurrentSearch.CurrentSearchProcessor}" PreviewKeyDown="searchTextBox_PreviewKeyDown" />
+                                <Grid>
+                                    <TextBox Text="{Binding CurrentSearch.CurrentSearchProcessor.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Validation.ErrorTemplate="{StaticResource ctpValidation}" ToolTip="{StaticResource ttpSearchQuery}" Tag="{Binding CurrentSearch.CurrentSearchProcessor}" PreviewKeyDown="searchTextBox_PreviewKeyDown" />
+                                    <Button ToolTip="Click to clear search text." Focusable="False" MaxWidth="18" HorizontalAlignment="Right" Margin="2" Visibility="{Binding CurrentSearch.CurrentSearchProcessor.HasSearchQuery, Converter={StaticResource cvtBooleanToVisibility}}" Command="{Binding CurrentSearch.CurrentSearchProcessor.ClearSearchQueryCommand}">
+                                        <Image UseLayoutRounding="True" SnapsToDevicePixels="True" Source="/CodeXCavator.UI;component/Images/cross.png" Width="12" Height="12"/>
+                                    </Button>
+                                </Grid>
                             </DockPanel>
                             <Label Padding="0,5,0,5">
                                 <DockPanel>
@@ -686,6 +760,7 @@
                     <DockPanel LastChildFill="True" HorizontalAlignment="Stretch">
                         <Image DockPanel.Dock="Left" Source="/CodeXCavator.UI;component/Images/page.png" Stretch="None" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Margin="0,0,5,0"/>
                         <CheckBox DockPanel.Dock="Right" Style="{StaticResource stlFilterCheckBox}" IsChecked="{Binding CurrentSearch.IsFilterByFileListEnabled}" ToolTip="Click here to toggle filtering by file list." Visibility="Collapsed"/>
+                        <CheckBox x:Name="chkSortFilesAlphabetically" DockPanel.Dock="Right" Style="{StaticResource stlSortCheckBox}" ToolTip="Click here to toggle alphabetical sorting of files. Please note, that for indexes with many files this may take a long time especially during startup." Margin="5,0,0,0" Checked="chkSortFilesAlphabetically_Checked" Unchecked="chkSortFilesAlphabetically_Unchecked"  />
                         <TextBlock DockPanel.Dock="Right" Text="{Binding CurrentSearch.CurrentIndex.FileCount, StringFormat=Total: {0}}"/>
                         <TextBlock DockPanel.Dock="Left" Text="Files:" FontWeight="Bold"/>
                     </DockPanel>
@@ -747,7 +822,12 @@
                     <DockPanel LastChildFill="True">
                         <CheckBox DockPanel.Dock="Right" Style="{StaticResource stlImmediateSearchCheckBox}" ToolTip="Click here to toggle immediate search." Margin="2,0,0,0" IsChecked="{Binding CurrentSearch.FileSearchProcessor.ImmediateSearch, Mode=TwoWay}"/>
                         <Button DockPanel.Dock="Right" Style="{StaticResource stlSearchButton}" Margin="2,0,0,0" ToolTip="Click here to search file list." Command="{Binding CurrentSearch.FileSearchProcessor.SearchCommand}"/>
-                        <TextBox Text="{Binding CurrentSearch.FileSearchProcessor.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Validation.ErrorTemplate="{StaticResource ctpValidation}" ToolTip="{StaticResource ttpSearchQuery}" Tag="{Binding CurrentSearch.FileSearchProcessor}" PreviewKeyDown="searchTextBox_PreviewKeyDown" />
+                        <Grid>
+                            <TextBox Text="{Binding CurrentSearch.FileSearchProcessor.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Validation.ErrorTemplate="{StaticResource ctpValidation}" ToolTip="{StaticResource ttpSearchQuery}" Tag="{Binding CurrentSearch.FileSearchProcessor}" PreviewKeyDown="searchTextBox_PreviewKeyDown" />
+                            <Button ToolTip="Click to clear search text." Focusable="False" MaxWidth="18" HorizontalAlignment="Right" Margin="2" Visibility="{Binding CurrentSearch.FileSearchProcessor.HasSearchQuery, Converter={StaticResource cvtBooleanToVisibility}}" Command="{Binding CurrentSearch.FileSearchProcessor.ClearSearchQueryCommand}">
+                                <Image UseLayoutRounding="True" SnapsToDevicePixels="True" Source="/CodeXCavator.UI;component/Images/cross.png" Width="12" Height="12"/>
+                            </Button>
+                        </Grid>
                     </DockPanel>
                 </StackPanel>
                 <ListBox x:Name="lbFiles" DockPanel.Dock="Bottom" ItemsSource="{Binding Source={StaticResource cvsFiles}}" ScrollViewer.HorizontalScrollBarVisibility="Visible" AlternationCount="2" SelectedValue="{Binding CurrentSearch.SelectedFile}" MouseDoubleClick="lbFiles_MouseDoubleClick">
@@ -814,7 +894,7 @@
                                             <Image Source="/CodeXCavator.UI;component/Images/logo.png" Stretch="None" VerticalAlignment="Top" Margin="0,0,5,0"/>
                                             <TextBlock TextAlignment="Justify" MaxWidth="400" TextWrapping="Wrap" VerticalAlignment="Center">
                                                 <Run FontSize="16" FontWeight="Bold" Foreground="White">CodeXCavator</Run><LineBreak/>
-                                                <Bold Foreground="White">Version:</Bold> <Run Foreground="White">0.10.0.10(alpha)</Run><LineBreak/>                                    
+                                                <Bold Foreground="White">Version:</Bold> <Run Foreground="White" Text="{x:Static l:AssemblyVersion.Version}"/><LineBreak/>                                    
                                             </TextBlock>
                                             <StackPanel.Background>
                                                 <LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
@@ -1041,18 +1121,18 @@
                                             <Expander HorizontalContentAlignment="Stretch" IsExpanded="{Binding IsExpanded}">
                                                 <Expander.Header>
                                                     <StackPanel Orientation="Horizontal">
-                                                        <Button Focusable="False" Margin="0,0,2,0" ToolTip="Click to open to the file." Tag="{Binding}" Click="btnOpenFileWithSearchHitsClick">
-                                                            <Image Source="/CodeXCavator.UI;component/Images/eye.png" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Width="12" Height="12"/>
-                                                        </Button>
-                                                        <Button Focusable="False" Margin="0,0,2,0" ToolTip="Click to add the directory of the file to the directory filter." Tag="{Binding FilePath}" Click="btnAddDirectory_Click">
-                                                            <Image Source="/CodeXCavator.UI;component/Images/funnel.png" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Width="12" Height="12"/>
-                                                        </Button>
-                                                        <Button Focusable="False" Margin="0,0,5,0" ToolTip="Click to navigate to the file in the file list." Tag="{Binding FilePath}" Click="btnJumpToFile_Click">
-                                                            <Image Source="/CodeXCavator.UI;component/Images/arrow_right.png" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Width="12" Height="12"/>
-                                                        </Button>
+                                                 <Button Focusable="False" Margin="0,0,2,0" ToolTip="Click to open to the file." Tag="{Binding}" Click="btnOpenFileWithSearchHitsClick">
+                                                    <Image Source="/CodeXCavator.UI;component/Images/eye.png" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Width="12" Height="12"/>
+                                                </Button>
+                                                <Button Focusable="False" Margin="0,0,2,0" ToolTip="Click to add the directory of the file to the directory filter." Tag="{Binding FilePath}" Click="btnAddDirectory_Click">
+                                                    <Image Source="/CodeXCavator.UI;component/Images/funnel.png" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Width="12" Height="12"/>
+                                                </Button>
+                                                <Button Focusable="False" Margin="0,0,5,0" ToolTip="Click to navigate to the file in the file list." Tag="{Binding FilePath}" Click="btnJumpToFile_Click">
+                                                    <Image Source="/CodeXCavator.UI;component/Images/arrow_right.png" VerticalAlignment="Top" SnapsToDevicePixels="True" UseLayoutRounding="True" Width="12" Height="12"/>
+                                                </Button>
                                                         <TextBlock Text="{Binding NumberOfOccurrences, StringFormat=Matches: {0}}" VerticalAlignment="Center" Margin="4 0 8 0"/>
-                                                        <Image Stretch="None" Source="{Binding Path=FilePath, Converter={StaticResource cvtFileNameToImageSource}}" UseLayoutRounding="True" SnapsToDevicePixels="True" ContextMenu="{StaticResource ctxDocument}"/>
-                                                        <TextBlock Text="{Binding FilePath}" ContextMenu="{StaticResource ctxDocument}"/>
+                                                <Image Stretch="None" Source="{Binding Path=FilePath, Converter={StaticResource cvtFileNameToImageSource}}" UseLayoutRounding="True" SnapsToDevicePixels="True" ContextMenu="{StaticResource ctxDocument}"/>
+                                                <TextBlock Text="{Binding FilePath}" ContextMenu="{StaticResource ctxDocument}"/>
                                                         <Canvas x:Name="cnvSpinner" Grid.Column="3" Grid.Row="0" Width="9" Height="9" VerticalAlignment="Center" HorizontalAlignment="Right" RenderTransformOrigin="0.5,0.5" Visibility="Collapsed">
                                                             <Canvas.RenderTransform>
                                                                 <RotateTransform x:Name="trfmSpinner"/>

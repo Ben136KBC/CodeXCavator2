@@ -1368,7 +1368,7 @@ namespace CodeXCavator.Engine.Interfaces
                     if( !string.IsNullOrEmpty( path ) )
                     {
                         // Create a file system based index.
-                        var indexBuilder = IndexFactory.CreateFileSystemIndex( Environment.ExpandEnvironmentVariables( path ), false );
+                        var indexBuilder = IndexFactory.CreateFileSystemIndex( Environment.ExpandEnvironmentVariables( path ) );
                         return indexBuilder;
                     }
                 }
