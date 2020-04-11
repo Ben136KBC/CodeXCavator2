@@ -8,7 +8,7 @@ To use the application, you have three options:
 - Download the Deploy directory and run the CodeXCavator.exe in there.
 - You can download the Portable Apps version [here](https://github.com/Ben136KBC/CodeXCavator2/blob/master/PortableAppsFiles/CodeXCavator2Portable_0.10_English.paf.exe)
 
-No installation or registration or adminitrator rights is required. The application requires .NET 4.0.
+No installation or registration or adminitrator rights is required. The application requires .NET 4.5.
 
 CodeXCavator is essentially a derivative of CodeXCavator (see https://sourceforge.net/p/codexcavator/wiki/Home/) but with a number of changes made by Ben van der Merwe. The changes are as follows:
 
@@ -29,4 +29,4 @@ Things I intend to work on:
 - Add an option to find the definition of something in the code.
 - Sorting results by directory.
 
-Last updated: 15 February 2019 by Ben van der Merwe.
+Last updated: 11 April 2020 by Ben van der Merwe.
